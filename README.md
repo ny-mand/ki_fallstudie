@@ -2,4 +2,4 @@
 
 KI-Nutzung:
 - Ideenfindung
-- Hilfe beim Aufsetzen des Projekts (Einrichtung venv)
+- Hilfe beim Aufsetzen des Projekts (Einrichtung venv, Ordnerstruktur)

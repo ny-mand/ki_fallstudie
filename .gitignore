@@ -1,0 +1,27 @@
+# Python-spezifische Dateien
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtuelle Umgebungen
+venv/
+env/
+.env/
+
+# Daten- und Protokolldateien, die nicht versioniert werden sollen
+data/
+*.log
+
+# Bytecode-Dateien
+*.pyc
+
+# Editor- und IDE-spezifische Dateien
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Betriebssystem-Dateien
+.DS_Store
+Thumbs.db
