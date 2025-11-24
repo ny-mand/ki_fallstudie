@@ -1,1 +1,3 @@
-#Zugriff auf Dateien (z.B. Projektordner mit Aufgaben und Teammitgliedern)
+class Manager:
+    def __init__(self):
+        pass
