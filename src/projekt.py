@@ -1,32 +1,26 @@
 import datetime as dt
 from src.item import Item
+from src.dateiverwaltung import *
 
 class Project(Item):
-    def __init__(self, name, description, member_list, task_list, date_start, date_due, priority, date_created=dt.datetime.now()):
+    def __init__(self, name, description, date_start, date_due, priority):
         super().__init__(name, description)
-        self.date_created = date_created
-        self.member_list = member_list
-        self.task_list = task_list
         self.date_start = date_start
         self.date_due = date_due
         self.priority = priority
+        self.working_by_person = []
+        self.working_by_task = []
 
     def get_name(self):
         return self.name
     def get_description(self):
         return self.description
-    def get_member_list(self):
-        return self.member_list
-    def get_task_list(self):
-        return self.task_list
     def get_date_start(self):
         return self.date_start
     def get_date_end(self):
         return self.date_due
     def get_priority(self):
         return self.priority
-    def get_date_created(self):
-        return self.date_created
 
     def is_running(self):
         current_date = dt.datetime.now()
@@ -36,12 +30,47 @@ class Project(Item):
             return "Overdue"
         else:
             return False
+    @staticmethod
+    def create_project():
+        data = read((Path(__file__).resolve().parent.parent / 'data' / 'projekte.json'))
+        if data:
+            new_id = data[-1]['project_id'] + 1
+        else:
+            new_id = 1
+
+        name_input = input("Gib den Namen des Projekts ein: ")
+        description_input = input("Gib eine Beschreibung des Projekts ein: ")
+        date_start_input = input("Gib das Startdatum des Projekts ein (YYYY-MM-DD): ")
+        date_due_input = input("Gib das Fälligkeitsdatum des Projekts ein (YYYY-MM-DD): ")
+        priority_input = input("Gib die Priorität des Projekts ein (niedrig (1), mittel (2), hoch (3)): ")
+        priority = "niedrig" if priority_input == "1" else "mittel" if priority_input == "2" else "hoch"
+        working_by_person = []
+        working_by_task = []
+
+        # add_member_choice = input("Möchtest du ein Teammitglied zum Projekt hinzufügen? (j/n): ").strip().lower()
+        # if add_member_choice == "j":
+        #     members_to_add = input("Wie viele Teammitglieder möchtest du hinzufügen? ")
+        #     for i in range(int(members_to_add)):
+        #         member_to_add = input("Gib den Namen des Teammitglieds ein: ")
+        #         self.assign_member_to_project(self, member_to_add)
 
 
+        new_project = {
+            "project_id": new_id,
+            "name": name_input,
+            "description": description_input,
+            "date_start": date_start_input,
+            "date_due": date_due_input,
+            "priority": priority,
+            "working_by_person": working_by_person,
+            "working_by_task": working_by_task
+        }
+        data.append(new_project)
+        write((Path(__file__).resolve().parent.parent / 'data' / 'projekte.json'), data)
+        print("Neues Projekt hinzugefügt:", name_input)
 
-    #def create_project(self):
-    #    return Project(
+    def assign_member_to_project(self, member):
+        pass
 
-project_1 = Project("Projekt Alpha", "2024-01-15")
-
-print(project_1.get_name())
+    def assign_task_to_member(self, task):
+        pass

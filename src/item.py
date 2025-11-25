@@ -13,7 +13,3 @@ class Item:
     @staticmethod
     def create_item():
         return Item(input("Gib den Namen deines Items ein."), input("Gib eine Beschreibung ein."))
-
-test = Item.create_item()
-print(test.get_name())
-print(test.get_description())
