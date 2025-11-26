@@ -37,7 +37,7 @@ def run():
         else:
             print("Ungültige Eingabe. Bitte versuche es erneut.")
 
-
+# mithilfe von AI an Änderungen in Daten angepasst und Lesbarkeit verbessert
 def show_projects():
     data = read(Path(__file__).resolve().parent.parent / 'data' / 'projekte.json')
     for projekt in data:
@@ -92,16 +92,24 @@ def create():
     print("--- Erstellen Menü ---")
     choice = input("Projekt erstellen (1)\nNeues Teammitglied (2)\nAufgabe erstellen (3)\nZurück zum Hauptmenü (0)\nWähle eine Option: ")
     if choice == "1":
-        Project.create_project()
-        print("Projekt erstellen")
+        project_created_name = Project.create_project()
+        add_member_choice = input("Möchtest du ein Teammitglied zum Projekt hinzufügen? (j/n): ").strip().lower()
+        if add_member_choice == "j":
+            members_to_add = input("Wie viele Teammitglieder möchtest du hinzufügen? ")
+            for i in range(int(members_to_add)):
+                member_to_add = input("Gib den Namen des Teammitglieds ein: ")
+                Project.assign_member_to_project(project_created_name, member_to_add)
+            print("Mitglieder zum Projekt hinzugefügt.")
+
     elif choice == "2":
         TeamMember.add_member()
-        print("Teammitglied erstellen")
+
     elif choice == "3":
         Task.create_task()
-        print("Aufgabe erstellen")
+
     elif choice == "0":
         return
+
     else:
         print("Ungültige Eingabe. Bitte versuche es erneut.")
         create()
@@ -111,8 +119,14 @@ def assign():
     print("--- Zuweisen Menü ---")
     choice = input("Aufgabe zuweisen (1)\nTeammitglied zu Projekt zuweisen (2)")
     if choice == "1":
-        #TODO assign_task()
-        print("Aufgabe zuweisen")
+        member_name = input("Gib den Namen des Teammitglieds ein: ")
+        task_name = input("Gib den Namen der Aufgabe ein: ")
+        Project.assign_task_to_member(member_name, task_name)
+        print("Aufgabe zugewiesen.")
     elif choice == "2":
-        #TODO assign_member_to_project()
-        print("Teammitglied zu Projekt zuweisen")
+        project_name = input("Zu welchem Projekt möchtest du Mitglieder hinzufügen? ")
+        members_to_add = input("Wie viele Teammitglieder möchtest du hinzufügen? ")
+        for i in range(int(members_to_add)):
+            member_to_add = input("Gib den Namen des Teammitglieds ein: ")
+            Project.assign_member_to_project(project_name, member_to_add)
+        print("Mitglieder zum Projekt hinzugefügt.")

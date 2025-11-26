@@ -47,14 +47,6 @@ class Project(Item):
         working_by_person = []
         working_by_task = []
 
-        # add_member_choice = input("Möchtest du ein Teammitglied zum Projekt hinzufügen? (j/n): ").strip().lower()
-        # if add_member_choice == "j":
-        #     members_to_add = input("Wie viele Teammitglieder möchtest du hinzufügen? ")
-        #     for i in range(int(members_to_add)):
-        #         member_to_add = input("Gib den Namen des Teammitglieds ein: ")
-        #         self.assign_member_to_project(self, member_to_add)
-
-
         new_project = {
             "project_id": new_id,
             "name": name_input,
@@ -68,9 +60,12 @@ class Project(Item):
         data.append(new_project)
         write((Path(__file__).resolve().parent.parent / 'data' / 'projekte.json'), data)
         print("Neues Projekt hinzugefügt:", name_input)
+        return name_input
 
-    def assign_member_to_project(self, member):
+    @staticmethod
+    def assign_member_to_project(project_name, member):
         pass
 
-    def assign_task_to_member(self, task):
+    @staticmethod
+    def assign_task_to_member(member, task):
         pass
