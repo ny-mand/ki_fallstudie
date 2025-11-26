@@ -133,4 +133,3 @@ def assign():
         for i in range(int(members_to_add)):
             member_to_add = input("Gib den Namen des Teammitglieds ein: ")
             Project.assign_member_to_project(project_name, member_to_add)
-        print("Mitglieder zum Projekt hinzugefügt.")

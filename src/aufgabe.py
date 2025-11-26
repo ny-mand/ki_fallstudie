@@ -31,6 +31,15 @@ class Task(Item):
         self.priority = priority
 
     @staticmethod
+    def task_exists(task_name):
+        data = read((Path(__file__).resolve().parent.parent / 'data' / 'aufgaben.json'))
+        for task in data:
+            if task['name'].lower() == task_name.lower():
+                return True
+        else:
+            return False
+
+    @staticmethod
     def create_task(date_created = dt.datetime.now().date().isoformat()):
         data = read((Path(__file__).resolve().parent.parent / 'data' / 'aufgaben.json'))
         if data:

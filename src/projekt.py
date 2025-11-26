@@ -1,6 +1,9 @@
 import datetime as dt
 from src.item import Item
 from src.dateiverwaltung import *
+from src.teammitglied import TeamMember
+from src.aufgabe import Task
+
 
 class Project(Item):
     def __init__(self, name, description, date_start, date_due, priority):
@@ -30,6 +33,16 @@ class Project(Item):
             return "Overdue"
         else:
             return False
+
+    @staticmethod
+    def project_exists(project_name):
+        data = read((Path(__file__).resolve().parent.parent / 'data' / 'projekte.json'))
+        for project in data:
+            if project['name'].lower() == project_name.lower():
+                return True
+        else:
+            return False
+
     @staticmethod
     def create_project():
         data = read((Path(__file__).resolve().parent.parent / 'data' / 'projekte.json'))
@@ -44,8 +57,8 @@ class Project(Item):
         date_due_input = input("Gib das Fälligkeitsdatum des Projekts ein (YYYY-MM-DD): ")
         priority_input = input("Gib die Priorität des Projekts ein (niedrig (1), mittel (2), hoch (3)): ")
         priority = "niedrig" if priority_input == "1" else "mittel" if priority_input == "2" else "hoch"
-        working_by_person = []
-        working_by_task = []
+        working_by_person = {}
+        working_by_task = {}
 
         new_project = {
             "project_id": new_id,
@@ -62,9 +75,47 @@ class Project(Item):
         print("Neues Projekt hinzugefügt:", name_input)
         return name_input
 
-    @staticmethod
-    def assign_member_to_project(project_name, member):
-        pass
+    @staticmethod #AI assisted
+    def assign_member_to_project(project_name, member, task=None):
+        data = read(Path(__file__).resolve().parent.parent / 'data' / 'projekte.json')
+        changed = False
+
+        if not Project.project_exists(project_name):
+            print(f'Projekt existiert nicht. Bitte erstelle es zuerst.')
+            return
+        if not TeamMember.member_exists(member):
+            print(f"Teammitglied existiert nicht. Bitte füge es zuerst hinzu.")
+            return
+        if input("Möchtest du eine Aufgabe zuweisen? (j/n): ").strip().lower() == "j":
+            task_name_input = input("Gib den Namen der Aufgabe ein: ").strip()
+            if not Task.task_exists(task_name_input):
+                print(f"Aufgabe existiert nicht. Bitte erstelle sie zuerst.")
+                return
+            task = task_name_input
+
+        for project in data:
+            if project["name"] == project_name:
+                project.setdefault("working_by_person", {}) #falls key nicht existiert
+                if member not in project["working_by_person"]:
+                    if task:
+                        project["working_by_person"][member] = [task]
+                        project.setdefault("working_by_task", {})
+                        if task in project["working_by_task"]:
+                            if member not in project["working_by_task"][task]:
+                                project["working_by_task"][task].append(member)
+                        else:
+                            project["working_by_task"][task] = [member]
+                    else:
+                        project["working_by_person"][member] = []
+                else:
+                    print(f"Mitglied {member} ist bereits dem Projekt {project_name} zugewiesen.")
+                    return
+                changed = True
+                break
+
+        if changed:
+            write(Path(__file__).resolve().parent.parent / 'data' / 'projekte.json', data)
+            print(f'{member} dem Projekt "{project_name}" zugewiesen.')
 
     @staticmethod
     def assign_task_to_member(member, task):

@@ -20,6 +20,15 @@ class TeamMember:
         return self.active_since
 
     @staticmethod
+    def member_exists(name):
+        data = read((Path(__file__).resolve().parent.parent / 'data' / 'teammitglieder.json'))
+        for member in data:
+            if member['name'].lower() == name.lower():
+                return True
+        else:
+            return False
+
+    @staticmethod
     def add_member(active_since = dt.datetime.now().date().isoformat()):
         data = read((Path(__file__).resolve().parent.parent / 'data' / 'teammitglieder.json'))
         if data:
