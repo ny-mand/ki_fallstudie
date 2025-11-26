@@ -95,11 +95,12 @@ class Project(Item):
 
         for project in data:
             if project["name"] == project_name:
-                project.setdefault("working_by_person", {}) #falls key nicht existiert
+                # Sicherstellen, dass die Mappings initialisiert sind
+                project.setdefault("working_by_person", {})
+                project.setdefault("working_by_task", {})
                 if member not in project["working_by_person"]:
                     if task:
                         project["working_by_person"][member] = [task]
-                        project.setdefault("working_by_task", {})
                         if task in project["working_by_task"]:
                             if member not in project["working_by_task"][task]:
                                 project["working_by_task"][task].append(member)
@@ -117,6 +118,43 @@ class Project(Item):
             write(Path(__file__).resolve().parent.parent / 'data' / 'projekte.json', data)
             print(f'{member} dem Projekt "{project_name}" zugewiesen.')
 
-    @staticmethod
-    def assign_task_to_member(member, task):
-        pass
+    @staticmethod #AI assisted
+    def assign_task_to_member(project_name, member, task):
+        data = read(Path(__file__).resolve().parent.parent / 'data' / 'projekte.json')
+        changed = False
+
+        if not Project.project_exists(project_name):
+            print(f'Projekt existiert nicht. Bitte erstelle es zuerst.')
+            return
+        if not TeamMember.member_exists(member):
+            print(f"Teammitglied existiert nicht. Bitte füge es zuerst hinzu.")
+            return
+        if not Task.task_exists(task):
+            print(f"Aufgabe existiert nicht. Bitte erstelle sie zuerst.")
+            return
+
+        for project in data:
+            if project["name"] == project_name:
+                # Sicherstellen, dass die Mappings initialisiert sind
+                project.setdefault("working_by_person", {})
+                project.setdefault("working_by_task", {})
+            if member not in project["working_by_person"]:
+                print(f"{member} ist nicht dem Projekt zugewiesen. Aufgabe kann nicht zugeteilt werden.")
+                return
+            if task in project["working_by_person"][member]:
+                print(f"{member} ist bereits der Aufgabe '{task}' zugewiesen.")
+                return
+
+            project["working_by_person"][member].append(task)
+            if task in project["working_by_task"]:
+                if member not in project["working_by_task"][task]:
+                    project["working_by_task"][task].append(member)
+            else:
+                project["working_by_task"][task] = [member]
+
+            changed = True
+            break
+
+        if changed:
+            write(Path(__file__).resolve().parent.parent / 'data' / 'projekte.json', data)
+            print(f"Aufgabe '{task}' erfolgreich an {member} im Projekt '{project_name}' zugewiesen.")

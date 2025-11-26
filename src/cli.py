@@ -123,10 +123,11 @@ def assign():
     print("--- Zuweisen Menü ---")
     choice = input("Aufgabe zuweisen (1)\nTeammitglied zu Projekt zuweisen (2)")
     if choice == "1":
+        project_name = input("In welchem Projekt möchtest du eine Aufgabe zuweisen? ")
         member_name = input("Gib den Namen des Teammitglieds ein: ")
         task_name = input("Gib den Namen der Aufgabe ein: ")
-        Project.assign_task_to_member(member_name, task_name)
-        print("Aufgabe zugewiesen.")
+        Project.assign_task_to_member(project_name, member_name, task_name)
+
     elif choice == "2":
         project_name = input("Zu welchem Projekt möchtest du Mitglieder hinzufügen? ")
         members_to_add = input("Wie viele Teammitglieder möchtest du hinzufügen? ")
