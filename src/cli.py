@@ -1,5 +1,6 @@
 from pathlib import Path
 from src.dateiverwaltung import read
+from src.filter import filter_projects
 from src.teammitglied import TeamMember
 from src.aufgabe import Task
 from src.projekt import Project
@@ -13,6 +14,7 @@ def show_menu():
     print("Aufgaben anzeigen (3)")
     print("Neu erstellen: (4)")
     print("Zuweisen: (5)")
+    print("Filter: (6)")
     print("Beenden (0)")
 
 
@@ -34,6 +36,8 @@ def run():
             create()
         elif user_input == "5":
             assign()
+        elif user_input == "6":
+            filter_projects()
         else:
             print("Ungültige Eingabe. Bitte versuche es erneut.")
 
