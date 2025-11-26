@@ -1,4 +1,3 @@
-import datetime as dt
 from src.item import Item
 from src.dateiverwaltung import *
 from src.teammitglied import TeamMember
@@ -6,33 +5,14 @@ from src.aufgabe import Task
 
 
 class Project(Item):
-    def __init__(self, name, description, date_start, date_due, priority):
+    def __init__(self, project_id, name, description, date_start, date_due, priority):
         super().__init__(name, description)
+        self.project_id = project_id
         self.date_start = date_start
         self.date_due = date_due
         self.priority = priority
         self.working_by_person = []
         self.working_by_task = []
-
-    def get_name(self):
-        return self.name
-    def get_description(self):
-        return self.description
-    def get_date_start(self):
-        return self.date_start
-    def get_date_end(self):
-        return self.date_due
-    def get_priority(self):
-        return self.priority
-
-    def is_running(self):
-        current_date = dt.datetime.now()
-        if self.date_start <= current_date:
-            return True
-        elif current_date >= self.date_due:
-            return "Overdue"
-        else:
-            return False
 
     @staticmethod
     def project_exists(project_name):
@@ -42,6 +22,18 @@ class Project(Item):
                 return True
         else:
             return False
+
+    @staticmethod
+    def validate_existence(project_name, member, task):
+        if not Project.project_exists(project_name):
+            print(f'Projekt existiert nicht. Bitte erstelle es zuerst.')
+            return
+        if not TeamMember.member_exists(member):
+            print(f"Teammitglied existiert nicht. Bitte füge es zuerst hinzu.")
+            return
+        if not Task.task_exists(task):
+            print(f"Aufgabe existiert nicht. Bitte erstelle sie zuerst.")
+            return
 
     @staticmethod
     def create_project():
@@ -80,18 +72,10 @@ class Project(Item):
         data = read(Path(__file__).resolve().parent.parent / 'data' / 'projekte.json')
         changed = False
 
-        if not Project.project_exists(project_name):
-            print(f'Projekt existiert nicht. Bitte erstelle es zuerst.')
-            return
-        if not TeamMember.member_exists(member):
-            print(f"Teammitglied existiert nicht. Bitte füge es zuerst hinzu.")
-            return
+        Project.validate_existence(project_name, member, task)
+
         if input("Möchtest du eine Aufgabe zuweisen? (j/n): ").strip().lower() == "j":
-            task_name_input = input("Gib den Namen der Aufgabe ein: ").strip()
-            if not Task.task_exists(task_name_input):
-                print(f"Aufgabe existiert nicht. Bitte erstelle sie zuerst.")
-                return
-            task = task_name_input
+            task = input("Gib den Namen der Aufgabe ein: ").strip()
 
         for project in data:
             if project["name"] == project_name:
@@ -123,15 +107,7 @@ class Project(Item):
         data = read(Path(__file__).resolve().parent.parent / 'data' / 'projekte.json')
         changed = False
 
-        if not Project.project_exists(project_name):
-            print(f'Projekt existiert nicht. Bitte erstelle es zuerst.')
-            return
-        if not TeamMember.member_exists(member):
-            print(f"Teammitglied existiert nicht. Bitte füge es zuerst hinzu.")
-            return
-        if not Task.task_exists(task):
-            print(f"Aufgabe existiert nicht. Bitte erstelle sie zuerst.")
-            return
+        Project.validate_existence(project_name, member, task)
 
         for project in data:
             if project["name"] == project_name:

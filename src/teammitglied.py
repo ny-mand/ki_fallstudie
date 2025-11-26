@@ -1,23 +1,12 @@
 import datetime as dt
-from pathlib import Path
 from src.dateiverwaltung import *
 
 class TeamMember:
-    def __init__(self, member_id, name, job_title, active_since, *allocated_tasks):
+    def __init__(self, member_id, name, job_title, active_since):
         self.member_id = member_id
         self.name = name
         self.job_title = job_title
         self.active_since = active_since
-        self.allocated_tasks = allocated_tasks
-
-    def get_member_id(self):
-        return self.member_id
-    def get_name(self):
-        return self.name
-    def get_job_title(self):
-        return self.job_title
-    def get_active_since(self):
-        return self.active_since
 
     @staticmethod
     def member_exists(name):
