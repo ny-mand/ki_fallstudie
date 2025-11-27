@@ -9,5 +9,9 @@ def read(file_path):
         return []
 
 def write(file_path, data):
-    with open(file_path, 'w') as file: #JSON-Datei öffnen zum Schreiben
-        json.dump(data, file, indent=2)
+    try:
+        with open(file_path, 'w') as file: #JSON-Datei öffnen zum Schreiben
+            json.dump(data, file, indent=2)
+    except FileNotFoundError:
+        print(f"Fehler: Datei {file_path} nicht gefunden.\nAktion konnte nicht ausgeführt werden.")
+        return
