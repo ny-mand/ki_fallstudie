@@ -1,5 +1,4 @@
-import datetime as dt
-
+#Basisklasse, auf der Projekt und Task aufbauen
 class Item:
     def __init__(self, name, description):
         self.name = name
@@ -9,7 +8,3 @@ class Item:
         return self.name
     def get_description(self):
         return self.description
-
-    @staticmethod
-    def create_item():
-        return Item(input("Gib den Namen deines Items ein."), input("Gib eine Beschreibung ein."))

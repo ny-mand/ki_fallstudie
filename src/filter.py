@@ -56,7 +56,7 @@ def filter_projects():
             "mittel": 2,
             "niedrig": 1
         }
-        #AI hilfe bei korrektem einsatzt von lambda
+        #AI hilfe bei korrektem einsatz von lambda
         all_projects.sort(key=lambda p: prio_map.get(p.get('priority', '').lower(), 0), reverse=True)
 
         for project in all_projects:
