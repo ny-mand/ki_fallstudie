@@ -7,10 +7,12 @@ def filter_projects():
     all_projects = read(file_path)
 
     print("--- Projekte filtern ---")
-    print("1: Nach Priorität filtern")
+    print("1: Nach bestimmter Priorität filtern")
     print("2: Nach Startdatum filtern (zeigt Projekte ab diesem Datum)")
+    print("3: Nach Fälligkeitsdatum (nächstes zuerst)")
+    print("4: Nach Priorität (Wichtigstes zuerst)")
 
-    choice_filter = input("Bitte wähle eine Option (1 oder 2): ").strip()
+    choice_filter = input("Bitte wähle eine Option (1, 2, 3 oder 4): ").strip()
 
     found_projects = []
 
@@ -35,24 +37,45 @@ def filter_projects():
         target_date = input("Startdatum eingeben (YYYY-MM-DD): ").strip()
 
         for project in all_projects:
-            # prüfen erst, ob 'date_start' existiert (nicht leer ist), sonst kracht es beim Vergleich
             if project['date_start'] and project['date_start'] >= target_date:
                 found_projects.append(project)
 
+    elif choice_filter == "3":
+        all_projects.sort(key=lambda p: p['date_due'])
+
+        for project in all_projects:
+                found_projects.append(project)
+
+        print("Sortiert nach Fälligkeitsdatum (aufsteigend).")
+
+    elif choice_filter == "4":
+        #AI Mapping-Tabelle erstellt mit "prio"
+
+        prio_map = {
+            "hoch": 3,
+            "mittel": 2,
+            "niedrig": 1
+        }
+        #AI hilfe bei korrektem einsatzt von lambda
+        all_projects.sort(key=lambda p: prio_map.get(p.get('priority', '').lower(), 0), reverse=True)
+
+        for project in all_projects:
+                found_projects.append(project)
+
+        print("Sortiert nach Priorität (hoch -> niedrig).")
 
     else:
-        print("Ungültige Auswahl. Bitte 1 oder 2 wählen.")
+        print("Ungültige Auswahl. Bitte 1, 2, 3 oder 4 wählen.")
         return
 
     print(f"--- {len(found_projects)} Projekte gefunden ---")
     for project in found_projects:
-        for project in found_projects:
-            print("-" * 20)  # Ein schöner Trennstrich
-            print(
+        print("-" * 20)
+        print(
                 f"Projekt-ID:   {project['project_id']}\n"
                 f"Name:         {project['name']}\n"
                 f"Startdatum:   {project['date_start']}\n"
                 f"Priorität:    {project['priority']}\n"
                 f"Beschreibung: {project['description']}"
             )
-            print("-" * 20)
+        print("-" * 20)
