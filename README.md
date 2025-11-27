@@ -5,12 +5,8 @@ KI-Nutzung:
 - Hilfe beim Aufsetzen des Projekts (Einrichtung venv, Ordnerstruktur)
 - Inspiration für Klassenstruktur
 - Umgang mit pathlib
+- Unterstützung bei Fehlerbehandlung
 
-#TODO:
-- fehlerbehandlung datum eingabe
-
-#TODO Ideen:
-- setup mit individuellen speicherdateien (presets laden)
 # Project Management Tool (CLI)
 
 Python-basiertes Kommandozeilen-Tool zur Verwaltung von Projekten, Aufgaben und Teammitgliedern (Lokaler Datenhaltung via JSON).
@@ -59,9 +55,9 @@ Es sind keine externen Bibliotheken notwendig, nur eine aktuelle Python-Version 
 
 ## Roadmap / Bekannte To-Dos
 
-* Fehlerbehandlung bei falschem Datumsformat verbessern.
 * Funktion zum Löschen von Einträgen hinzufügen.
 * Status für Aufgaben einführen (z. B. "In Bearbeitung", "Erledigt").
+* Datenintegrität sicherstellen (z. B. keine doppelten Einträge).
 
 ---
 *Erstellt für die Übungsaufgabe KI Fallstudie 2 (Gruppe).*

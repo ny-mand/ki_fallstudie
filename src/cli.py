@@ -4,6 +4,7 @@ from src.filter import filter_projects
 from src.teammitglied import TeamMember
 from src.aufgabe import Task
 from src.projekt import Project
+from src.utils import *
 
 
 
@@ -22,7 +23,7 @@ def run():
     print("Willkommen im Projektmanagement-Tool")
     while True:
         show_menu()
-        user_input = input("Wähle eine Option: ").strip().lower()
+        user_input = get_non_empty_input("Wähle eine Option: ")
         if user_input == "0":
             print("-" *20, "\nProgramm beendet.")
             break
@@ -50,8 +51,8 @@ def show_projects():
             f"Projekt-ID: {projekt['project_id']}\n"
             f"Projektname: {projekt['name']}\n"
             f"Beschreibung: {projekt['description']}\n"
-            f"Startdatum: {projekt['date_start']}\n"
-            f"Enddatum: {projekt['date_due']}\n"
+            f"Startdatum: {format_to_german_date(projekt['date_start'])}\n"
+            f"Enddatum: {format_to_german_date(projekt['date_due'])}\n"
             f"Priorität: {projekt['priority']}\n"
         )
         # nächster Block AI
@@ -59,7 +60,11 @@ def show_projects():
         if isinstance(working_by_person, dict) and working_by_person:
             print("Teammitglieder und Aufgaben:")
             for person, task_name in working_by_person.items():
-                print(f"  - {person}: {task_name}")
+                if isinstance(task_name, list):
+                    tasks_str = ", ".join(str(t) for t in task_name)
+                else:
+                    tasks_str = str(task_name)
+                print(f"  - {person}: {tasks_str}")
         else:
             print("Keine Teamzuweisungen vorhanden.")
         print("-" * 20)
@@ -72,7 +77,7 @@ def show_team_members():
         print(
             f"Name: {member['name']}\n"
             f"Berufsbezeichnung: {member['job_title']}\n"
-            f"Aktiv seit: {member['active_since']}"
+            f"Aktiv seit: {format_to_german_date(member['active_since'])}"
         )
         print("-" * 20)
 
@@ -86,22 +91,31 @@ def show_tasks():
             f"Aufgabe: {task['name']}\n"
             f"Beschreibung: {task['description']}\n"
             f"Priorität: {task['priority']}\n"
-            f"Fälligkeitsdatum: {task['date_due']}\n"
-            f"Erstellt am: {task['date_created']}"
+            f"Fälligkeitsdatum: {format_to_german_date(task['date_due'])}\n"
+            f"Erstellt am: {format_to_german_date(task['date_created'])}"
         )
         print("-" * 20)
 
 
 def create():
     print("--- Erstellen Menü ---")
-    choice = input("Projekt erstellen (1)\nNeues Teammitglied (2)\nAufgabe erstellen (3)\nZurück zum Hauptmenü (0)\nWähle eine Option: ")
+    choice = get_non_empty_input("Projekt erstellen (1)\nNeues Teammitglied (2)\nAufgabe erstellen (3)\nZurück zum Hauptmenü (0)\nWähle eine Option: ")
     if choice == "1":
         project_created_name = Project.create_project()
         add_member_choice = input("Möchtest du ein Teammitglied zum Projekt hinzufügen? (j/n): ").strip().lower()
         if add_member_choice == "j":
-            members_to_add = input("Wie viele Teammitglieder möchtest du hinzufügen? ")
-            for i in range(int(members_to_add)):
-                member_to_add = input("Gib den Namen des Teammitglieds ein: ")
+            members_to_add = None
+            while members_to_add is None:
+                members_to_add_input = get_non_empty_input("Wie viele Teammitglieder möchtest du hinzufügen? ")
+                try:
+                    members_to_add = int(members_to_add_input)
+                    if members_to_add < 1:
+                        print("Bitte gib eine Zahl größer 0 ein.")
+                        members_to_add = None
+                except ValueError:
+                    print("Ungültige Eingabe. Bitte gib eine Zahl ein.")
+            for i in range(members_to_add):
+                member_to_add = get_non_empty_input("Gib den Namen des Teammitglieds ein: ")
                 Project.assign_member_to_project(project_created_name, member_to_add)
             print("Mitglieder zum Projekt hinzugefügt.")
 
@@ -121,16 +135,31 @@ def create():
 
 def assign():
     print("--- Zuweisen Menü ---")
-    choice = input("Aufgabe zuweisen (1)\nTeammitglied zu Projekt zuweisen (2)")
+    choice = get_non_empty_input("Aufgabe zuweisen (1)\nTeammitglied zu Projekt zuweisen (2)")
     if choice == "1":
-        project_name = input("In welchem Projekt möchtest du eine Aufgabe zuweisen? ")
-        member_name = input("Gib den Namen des Teammitglieds ein: ")
-        task_name = input("Gib den Namen der Aufgabe ein: ")
+        project_name = get_non_empty_input("In welchem Projekt möchtest du eine Aufgabe zuweisen? ")
+        member_name = get_non_empty_input("Gib den Namen des Teammitglieds ein: ")
+        task_name = get_non_empty_input("Gib den Namen der Aufgabe ein: ")
         Project.assign_task_to_member(project_name, member_name, task_name)
 
     elif choice == "2":
-        project_name = input("Zu welchem Projekt möchtest du Mitglieder hinzufügen? ")
-        members_to_add = input("Wie viele Teammitglieder möchtest du hinzufügen? ")
-        for i in range(int(members_to_add)):
-            member_to_add = input("Gib den Namen des Teammitglieds ein: ")
+        project_name = get_non_empty_input("Zu welchem Projekt möchtest du Mitglieder hinzufügen? ")
+        members_to_add = None
+        while members_to_add is None:
+            members_to_add_input = get_non_empty_input("Wie viele Teammitglieder möchtest du hinzufügen? ")
+            try:
+                members_to_add = int(members_to_add_input)
+                if members_to_add < 1:
+                    print("Bitte gib eine Zahl größer 0 ein.")
+                    members_to_add = None
+            except ValueError:
+                print("Ungültige Eingabe. Bitte gib eine Zahl ein.")
+
+        for i in range(members_to_add):
+            member_to_add = get_non_empty_input("Gib den Namen des Teammitglieds ein: ")
             Project.assign_member_to_project(project_name, member_to_add)
+        if members_to_add > 1:
+            print("Mitglieder zum Projekt hinzugefügt.")
+        else:
+            print("Mitglied zum Projekt hinzugefügt.")
+

@@ -2,6 +2,7 @@ from src.item import Item
 from src.dateiverwaltung import *
 from src.teammitglied import TeamMember
 from src.aufgabe import Task
+from src.utils import *
 
 
 class Project(Item):
@@ -24,21 +25,21 @@ class Project(Item):
         for project in data:
             if project['name'].lower() == project_name.lower():
                 return True
-        else:
-            return False
+        return False
 
     @staticmethod
     def validate_existence(project_name, member, task):
         # Prüfe nacheinander, ob Projekt, Mitglied und Aufgabe existieren
         if not Project.project_exists(project_name):
             print(f'Projekt existiert nicht. Bitte erstelle es zuerst.')
-            return
+            return False
         if not TeamMember.member_exists(member):
             print(f"Teammitglied existiert nicht. Bitte füge es zuerst hinzu.")
-            return
+            return False
         if not Task.task_exists(task):
             print(f"Aufgabe existiert nicht. Bitte erstelle sie zuerst.")
-            return
+            return False
+        return True
 
     @staticmethod
     def create_project():
@@ -50,11 +51,29 @@ class Project(Item):
             new_id = 1
 
         # Benutzereingaben sammeln
-        name_input = input("Gib den Namen des Projekts ein: ")
-        description_input = input("Gib eine Beschreibung des Projekts ein: ")
-        date_start_input = input("Gib das Startdatum des Projekts ein (YYYY-MM-DD): ")
-        date_due_input = input("Gib das Fälligkeitsdatum des Projekts ein (YYYY-MM-DD): ")
-        priority_input = input("Gib die Priorität des Projekts ein (niedrig (1), mittel (2), hoch (3)): ")
+        name_input = get_non_empty_input("Gib den Namen des Projekts ein: ")
+        if Project.project_exists(name_input):
+            print(f"Ein Projekt mit dem Namen '{name_input}' existiert bereits.")
+            return
+
+        description_input = get_non_empty_input("Gib eine Beschreibung des Projekts ein: ")
+        date_start_input = get_non_empty_input("Gib das Startdatum des Projekts ein (YYYY-MM-DD): ")
+        # Validierung des Datumsformats
+        while not validate_date_format(date_start_input):
+            print("Ungültiges Datumsformat. Bitte benutze YYYY-MM-DD.")
+            date_start_input = get_non_empty_input("Gib das Startdatum des Projekts ein (YYYY-MM-DD): ")
+
+        date_due_input = get_non_empty_input("Gib das Fälligkeitsdatum des Projekts ein (YYYY-MM-DD): ")
+        # Validierung des Datumsformats
+        while not validate_date_format(date_due_input):
+            print("Ungültiges Datumsformat. Bitte benutze YYYY-MM-DD.")
+            date_due_input = get_non_empty_input("Gib das Fälligkeitsdatum des Projekts ein (YYYY-MM-DD): ")
+
+        priority_input = get_non_empty_input("Gib die Priorität des Projekts ein (niedrig (1), mittel (2), hoch (3)): ")
+        while not priority_input in ["1", "2", "3"]: # Validierung der Prioritätseingabe
+            print("Ungültige Eingabe. Bitte gib 1, 2 oder 3 ein.")
+            priority_input = get_non_empty_input("Gib die Priorität des Projekts ein (niedrig (1), mittel (2), hoch (3)): ").strip()
+
         # Konvertiere Zahl in Prioritätstext
         priority = "niedrig" if priority_input == "1" else "mittel" if priority_input == "2" else "hoch"
         # Initialisiere leere Zuordnungen
@@ -83,12 +102,13 @@ class Project(Item):
         data = read(Path(__file__).resolve().parent.parent / 'data' / 'projekte.json')
         changed = False
 
-        # Validiere, dass Projekt, Mitglied und Aufgabe existieren
-        Project.validate_existence(project_name, member, task)
-
         # Optional: Frage nach Aufgabenzuweisung
         if input("Möchtest du eine Aufgabe zuweisen? (j/n): ").strip().lower() == "j":
-            task = input("Gib den Namen der Aufgabe ein: ").strip()
+            task = get_non_empty_input("Gib den Namen der Aufgabe ein: ")
+
+        # Validiere, dass Projekt, Mitglied und Aufgabe existieren
+        if not Project.validate_existence(project_name, member, task):
+            return
 
         # Suche Projekt und weise Mitglied zu
         for project in data:
@@ -127,7 +147,8 @@ class Project(Item):
         changed = False
 
         # Validiere Existenz
-        Project.validate_existence(project_name, member, task)
+        if not Project.validate_existence(project_name, member, task):
+            return
 
         for project in data:
             if project["name"] == project_name:
