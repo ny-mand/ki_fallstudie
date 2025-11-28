@@ -16,6 +16,8 @@ class Task(Item):
     def task_exists(task_name):
         # Aufgabendaten aus JSON laden
         data = read((Path(__file__).resolve().parent.parent / 'data' / 'aufgaben.json'))
+        if task_name is None: # Fehler, die mit None zusammenhängen abfangen
+            return False
         # Prüfe, ob Aufgabenname vorhanden ist (case-insensitive)
         for task in data:
             if task['name'].lower() == task_name.lower():

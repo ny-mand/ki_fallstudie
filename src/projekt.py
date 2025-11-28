@@ -13,9 +13,9 @@ class Project(Item):
         self.date_due = date_due
         self.priority = priority
         # Dictionary: Mitglied -> Liste von Aufgaben
-        self.working_by_person = []
+        self.working_by_person = {}
         # Dictionary: Aufgabe -> Liste von Mitgliedern
-        self.working_by_task = []
+        self.working_by_task = {}
 
     @staticmethod
     def project_exists(project_name):
@@ -36,6 +36,8 @@ class Project(Item):
         if not TeamMember.member_exists(member):
             print(f"Teammitglied existiert nicht. Bitte füge es zuerst hinzu.")
             return False
+        if task == "": # Falls keine Aufgabe angegeben wurde, überspringe die Prüfung
+            return True
         if not Task.task_exists(task):
             print(f"Aufgabe existiert nicht. Bitte erstelle sie zuerst.")
             return False

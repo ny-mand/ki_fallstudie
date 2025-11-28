@@ -1,10 +1,14 @@
 from src.dateiverwaltung import *
 from pathlib import Path
+from src.utils import *
 
 
 def filter_projects():
     file_path = Path(__file__).resolve().parent.parent / 'data' / 'projekte.json'
     all_projects = read(file_path)
+    if not all_projects:
+        print("Keine Projekte zum Filtern gefunden.")
+        return
 
     print("--- Projekte filtern ---")
     print("1: Nach bestimmter Priorität filtern")
@@ -12,12 +16,12 @@ def filter_projects():
     print("3: Nach Fälligkeitsdatum (nächstes zuerst)")
     print("4: Nach Priorität (Wichtigstes zuerst)")
 
-    choice_filter = input("Bitte wähle eine Option (1, 2, 3 oder 4): ").strip()
+    choice_filter = get_non_empty_input("Bitte wähle eine Option (1, 2, 3 oder 4): ")
 
     found_projects = []
 
     if choice_filter == "1":
-        prio_input = input("Priorität wählen - niedrig (1), mittel (2), hoch (3): ").strip().lower()
+        prio_input = get_non_empty_input("Priorität wählen - niedrig (1), mittel (2), hoch (3): ").lower()
 
         if prio_input == "1" or prio_input == "niedrig":
             target_priority = "niedrig"
@@ -34,7 +38,10 @@ def filter_projects():
                 found_projects.append(project)
 
     elif choice_filter == "2":
-        target_date = input("Startdatum eingeben (YYYY-MM-DD): ").strip()
+        target_date = get_non_empty_input("Gib das Startdatum ein (YYYY-MM-DD): ")
+        while not validate_date_format(target_date):
+            print("Ungültiges Datumsformat. Bitte benutze YYYY-MM-DD.")
+            target_date = get_non_empty_input("Gib das Startdatum ein (YYYY-MM-DD): ")
 
         for project in all_projects:
             if project['date_start'] and project['date_start'] >= target_date:

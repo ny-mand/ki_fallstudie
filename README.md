@@ -58,6 +58,7 @@ Es sind keine externen Bibliotheken notwendig, nur eine aktuelle Python-Version 
 * Funktion zum Löschen von Einträgen hinzufügen.
 * Status für Aufgaben einführen (z. B. "In Bearbeitung", "Erledigt").
 * Datenintegrität sicherstellen (z. B. keine doppelten Einträge).
+* IDs in Funktionalität einbinden (bisher nur für potenzielle zukünftige Skalierung implementiert)
 
 ---
 *Erstellt für die Übungsaufgabe KI Fallstudie 2 (Gruppe).*
