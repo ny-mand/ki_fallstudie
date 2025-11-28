@@ -36,7 +36,7 @@ class Project(Item):
         if not TeamMember.member_exists(member):
             print(f"Teammitglied existiert nicht. Bitte füge es zuerst hinzu.")
             return False
-        if task == "": # Falls keine Aufgabe angegeben wurde, überspringe die Prüfung
+        if task == "" or task is None: # Falls keine Aufgabe angegeben wurde, überspringe die Prüfung
             return True
         if not Task.task_exists(task):
             print(f"Aufgabe existiert nicht. Bitte erstelle sie zuerst.")
@@ -70,6 +70,13 @@ class Project(Item):
         while not validate_date_format(date_due_input):
             print("Ungültiges Datumsformat. Bitte benutze YYYY-MM-DD.")
             date_due_input = get_non_empty_input("Gib das Fälligkeitsdatum des Projekts ein (YYYY-MM-DD): ")
+
+        while date_start_input > date_due_input:
+            print("Das Fälligkeitsdatum muss nach dem Startdatum liegen.")
+            date_due_input = get_non_empty_input("Gib das Fälligkeitsdatum des Projekts ein (YYYY-MM-DD): ")
+            while not validate_date_format(date_due_input):
+                print("Ungültiges Datumsformat. Bitte benutze YYYY-MM-DD.")
+                date_due_input = get_non_empty_input("Gib das Fälligkeitsdatum des Projekts ein (YYYY-MM-DD): ")
 
         priority_input = get_non_empty_input("Gib die Priorität des Projekts ein (niedrig (1), mittel (2), hoch (3)): ")
         while not priority_input in ["1", "2", "3"]: # Validierung der Prioritätseingabe
@@ -157,26 +164,31 @@ class Project(Item):
                 # Stelle sicher, dass Mappings existieren
                 project.setdefault("working_by_person", {})
                 project.setdefault("working_by_task", {})
-            # Prüfe, ob Mitglied dem Projekt zugewiesen ist
-            if member not in project["working_by_person"]:
-                print(f"{member} ist nicht dem Projekt zugewiesen. Aufgabe kann nicht zugeteilt werden.")
-                return
-            # Prüfe ob Aufgabe bereits zugewiesen
-            if task in project["working_by_person"][member]:
-                print(f"{member} ist bereits der Aufgabe '{task}' zugewiesen.")
-                return
+                # Prüfe, ob Mitglied dem Projekt zugewiesen ist
+                if member not in project["working_by_person"]:
+                    print(f"{member} ist nicht dem Projekt zugewiesen. Aufgabe kann nicht zugeteilt werden.")
+                    return
+                # Prüfe ob Aufgabe bereits zugewiesen
+                if task in project["working_by_person"][member]:
+                    print(f"{member} ist bereits der Aufgabe '{task}' zugewiesen.")
+                    return
 
-            # Füge Aufgabe zum Mitglied hinzu
-            project["working_by_person"][member].append(task)
-            # Bidirektionale Zuordnung: Aufgabe → Mitglied
-            if task in project["working_by_task"]:
-                if member not in project["working_by_task"][task]:
-                    project["working_by_task"][task].append(member)
-            else:
-                project["working_by_task"][task] = [member]
+                # Füge Aufgabe zum Mitglied hinzu
+                #AI fix für den Fall, dass nur ein String statt einer Liste gespeichert ist
+                if isinstance(project["working_by_person"][member], str):
+                    project["working_by_person"][member] = [project["working_by_person"][member]]
+                elif not isinstance(project["working_by_person"][member], list):
+                    project["working_by_person"][member] = []
+                project["working_by_person"][member].append(task)
+                # Bidirektionale Zuordnung: Aufgabe → Mitglied
+                if task in project["working_by_task"]:
+                    if member not in project["working_by_task"][task]:
+                        project["working_by_task"][task].append(member)
+                else:
+                    project["working_by_task"][task] = [member]
 
-            changed = True
-            break
+                changed = True
+                break
 
         # Speichere Änderungen
         if changed:

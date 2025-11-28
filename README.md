@@ -4,8 +4,10 @@ KI-Nutzung:
 - Ideenfindung
 - Hilfe beim Aufsetzen des Projekts (Einrichtung venv, Ordnerstruktur)
 - Inspiration für Klassenstruktur
-- Umgang mit pathlib
+- Umgang mit Modulen z.B. pathlib, json
 - Unterstützung bei Fehlerbehandlung
+- automatische Neuformatierung von Code mithilfe von GitHub Copilot
+- automatische Vervollständigung von repetitiven Codesegmenten
 
 # Project Management Tool (CLI)
 
@@ -40,6 +42,8 @@ Es sind keine externen Bibliotheken notwendig, nur eine aktuelle Python-Version 
     ```bash
     python main.py
     ```
+    
+Achtung: Achte darauf, dass in deinen Daten keine Umlaute (ä, ö, ü) verwendet werden, da dies zu Problemen bei der JSON-Verarbeitung führen kann.
 ## Nutzung
  erst wenn cli.py final fertig ist
 

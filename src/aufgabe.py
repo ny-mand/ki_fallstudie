@@ -41,10 +41,10 @@ class Task(Item):
 
         description_input = get_non_empty_input("Gib eine Beschreibung der Aufgabe ein: ")
 
-        priority_input = get_non_empty_input("Gib die Priorität des Projekts ein (niedrig (1), mittel (2), hoch (3)): ")
+        priority_input = get_non_empty_input("Gib die Priorität der Aufgabe ein (niedrig (1), mittel (2), hoch (3)): ")
         while not priority_input in ["1", "2", "3"]:  # Validierung der Prioritätseingabe
             print("Ungültige Eingabe. Bitte gib 1, 2 oder 3 ein.")
-            priority_input = get_non_empty_input("Gib die Priorität des Projekts ein (niedrig (1), mittel (2), hoch (3)): ")
+            priority_input = get_non_empty_input("Gib die Priorität der Aufgabe ein (niedrig (1), mittel (2), hoch (3)): ")
 
         # Konvertiere Zahl in Prioritätstext
         priority = "niedrig" if priority_input == "1" else "mittel" if priority_input == "2" else "hoch"

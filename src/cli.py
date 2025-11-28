@@ -45,6 +45,9 @@ def run():
 # mithilfe von AI an Änderungen in Daten angepasst und Lesbarkeit verbessert
 def show_projects():
     data = read(Path(__file__).resolve().parent.parent / 'data' / 'projekte.json')
+    if not data:
+        print("Keine Projekte gefunden.")
+        return
     for projekt in data:
         print("-" * 20)
         print(
@@ -72,6 +75,9 @@ def show_projects():
 
 def show_team_members():
     data = read(Path(__file__).resolve().parent.parent / 'data' / 'teammitglieder.json')
+    if not data:
+        print("Keine Teammitglieder gefunden.")
+        return
     for member in data:
         print("-" * 20)
         print(
@@ -84,6 +90,9 @@ def show_team_members():
 
 def show_tasks():
     data = read(Path(__file__).resolve().parent.parent / 'data' / 'aufgaben.json')
+    if not data:
+        print("Keine Aufgaben gefunden.")
+        return
     for task in data:
         print("-" * 20)
         print(
@@ -135,15 +144,21 @@ def create():
 
 def assign():
     print("--- Zuweisen Menü ---")
-    choice = get_non_empty_input("Aufgabe zuweisen (1)\nTeammitglied zu Projekt zuweisen (2)")
+    choice = get_non_empty_input("Aufgabe zuweisen (1)\nTeammitglied zu Projekt zuweisen (2)\nZurück zum Hauptmenü (0)\nWähle eine Option: ")
     if choice == "1":
         project_name = get_non_empty_input("In welchem Projekt möchtest du eine Aufgabe zuweisen? ")
+        if not Project.project_exists(project_name):
+            print(f"Das Projekt '{project_name}' existiert nicht.")
+            return
         member_name = get_non_empty_input("Gib den Namen des Teammitglieds ein: ")
         task_name = get_non_empty_input("Gib den Namen der Aufgabe ein: ")
         Project.assign_task_to_member(project_name, member_name, task_name)
 
     elif choice == "2":
         project_name = get_non_empty_input("Zu welchem Projekt möchtest du Mitglieder hinzufügen? ")
+        if not Project.project_exists(project_name):
+            print(f"Das Projekt '{project_name}' existiert nicht.")
+            return
         members_to_add = None
         while members_to_add is None:
             members_to_add_input = get_non_empty_input("Wie viele Teammitglieder möchtest du hinzufügen? ")
@@ -162,4 +177,7 @@ def assign():
             print("Mitglieder zum Projekt hinzugefügt.")
         else:
             print("Mitglied zum Projekt hinzugefügt.")
+
+    elif choice == "0":
+        return
 

@@ -7,6 +7,9 @@ def read(file_path):
             return json.load(file)
     except FileNotFoundError: #falls Datei nicht existiert leere Liste zurückgeben, um Programmabbruch zu vermeiden
         return []
+    except json.JSONDecodeError:
+        print(f"Warnung: Datei ist beschädigt, ungültig oder leer.")
+        return []
 
 def write(file_path, data):
     try:
