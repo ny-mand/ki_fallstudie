@@ -262,7 +262,7 @@ def delete_item(item_type):
         return
 
     # Frage nach Namen
-    name = get_non_empty_input(f"Gib den Namen des zu löschenden {item_type}s ein: ") if item_type in ["projekt", "teammitglied"] else print("Gib den Namen der zu löschenden Aufgabe ein: ")
+    name = get_non_empty_input(f"Gib den Namen des zu löschenden {item_type}s ein: ") if item_type in ["projekt", "teammitglied"] else get_non_empty_input("Gib den Namen der zu löschenden Aufgabe ein: ")
 
     # Prüfe Existenz
     if not exists_func(name):
