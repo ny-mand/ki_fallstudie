@@ -1,5 +1,5 @@
 from pathlib import Path
-from src.dateiverwaltung import read
+from src.dateiverwaltung import *
 from src.filter import filter_projects
 from src.teammitglied import TeamMember
 from src.aufgabe import Task
@@ -14,8 +14,9 @@ def show_menu():
     print("Teammitglieder anzeigen (2)")
     print("Aufgaben anzeigen (3)")
     print("Neu erstellen: (4)")
-    print("Zuweisen: (5)")
+    print("Zuweisungen verwalten: (5)")
     print("Filter: (6)")
+    print("Löschen: (7)")
     print("Beenden (0)")
 
 
@@ -39,6 +40,8 @@ def run():
             assign()
         elif user_input == "6":
             filter_projects()
+        elif user_input == "7":
+            delete()
         else:
             print("Ungültige Eingabe. Bitte versuche es erneut.")
 
@@ -142,9 +145,32 @@ def create():
         create()
 
 
+def delete():
+    print("--- Löschen Menü ---")
+    choice = get_non_empty_input(
+        "Projekt löschen (1)\n"
+        "Aufgabe löschen (2)\n"
+        "Teammitglied löschen (3)\n"
+        "Zurück zum Hauptmenü (0)\n"
+        "Wähle eine Option: "
+    )
+
+    if choice == "1":
+        delete_item("projekt")
+    elif choice == "2":
+        delete_item("aufgabe")
+    elif choice == "3":
+        delete_item("teammitglied")
+    elif choice == "0":
+        return
+    else:
+        print("Ungültige Eingabe.")
+
+# AI assisted
 def assign():
-    print("--- Zuweisen Menü ---")
-    choice = get_non_empty_input("Aufgabe zuweisen (1)\nTeammitglied zu Projekt zuweisen (2)\nZurück zum Hauptmenü (0)\nWähle eine Option: ")
+    print("--- Zuweisungen verwalten ---")
+    choice = get_non_empty_input("Aufgabe zuweisen (1)\nAufgabe entfernen (2)\nTeammitglied zu Projekt zuweisen (3)\n"
+        "Teammitglied aus Projekt entfernen (4)\nZurück zum Hauptmenü (0)\nWähle eine Option: ")
     if choice == "1":
         project_name = get_non_empty_input("In welchem Projekt möchtest du eine Aufgabe zuweisen? ")
         if not Project.project_exists(project_name):
@@ -154,7 +180,7 @@ def assign():
         task_name = get_non_empty_input("Gib den Namen der Aufgabe ein: ")
         Project.assign_task_to_member(project_name, member_name, task_name)
 
-    elif choice == "2":
+    elif choice == "3":
         project_name = get_non_empty_input("Zu welchem Projekt möchtest du Mitglieder hinzufügen? ")
         if not Project.project_exists(project_name):
             print(f"Das Projekt '{project_name}' existiert nicht.")
@@ -178,6 +204,88 @@ def assign():
         else:
             print("Mitglied zum Projekt hinzugefügt.")
 
+    elif choice == "2":
+        project_name = get_non_empty_input("Aus welchem Projekt möchtest du ein Mitglied entfernen? ")
+        if not Project.project_exists(project_name):
+            print(f"Das Projekt '{project_name}' existiert nicht.")
+            return
+        member_name = get_non_empty_input("Von welchem Mitglied? ")
+        task_name = get_non_empty_input("Welche Aufgabe? ")
+        Project.remove_task_from_member(project_name, member_name, task_name)
+
+    elif choice == "4":
+        project_name = get_non_empty_input("Aus welchem Projekt? ")
+        if not Project.project_exists(project_name):
+            print(f"Das Projekt '{project_name}' existiert nicht.")
+            return
+        member_name = get_non_empty_input("Welches Mitglied entfernen? ")
+        Project.remove_member_from_project(project_name, member_name)
+
     elif choice == "0":
         return
+
+    else:
+        print("Ungültige Eingabe.")
+
+
+# AI assisted
+def delete_item(item_type):
+    # Bestimme Datei und relevante Felder basierend auf Typ
+    if item_type == "projekt":
+        file_path = Path(__file__).resolve().parent.parent / 'data' / 'projekte.json'
+        name_field = "name"
+        id_field = "project_id"
+        exists_func = Project.project_exists
+    elif item_type == "aufgabe":
+        file_path = Path(__file__).resolve().parent.parent / 'data' / 'aufgaben.json'
+        name_field = "name"
+        id_field = "task_id"
+        exists_func = Task.task_exists
+    elif item_type == "teammitglied":
+        file_path = Path(__file__).resolve().parent.parent / 'data' / 'teammitglieder.json'
+        name_field = "name"
+        id_field = "member_id"
+        exists_func = TeamMember.member_exists
+    else:
+        print("Ungültiger Typ.")
+        return
+
+    # Lade Daten
+    data = read(file_path)
+    if not data:
+        if item_type == "projekt":
+            print(f"Keine Projekte gefunden.")
+        if item_type == "aufgabe":
+            print(f"Keine Aufgaben gefunden.")
+        if item_type == "teammitglied":
+            print(f"Keine Teammitglieder gefunden.")
+        return
+
+    # Frage nach Namen
+    name = get_non_empty_input(f"Gib den Namen des zu löschenden {item_type}s ein: ") if item_type in ["projekt", "teammitglied"] else print("Gib den Namen der zu löschenden Aufgabe ein: ")
+
+    # Prüfe Existenz
+    if not exists_func(name):
+        print(f"{item_type.capitalize()} '{name}' existiert nicht.")
+        return
+
+    # Bestätigung einholen
+    confirm = get_non_empty_input(f"Möchtest du '{name}' wirklich löschen? (j/n): ").lower()
+    if confirm != "j":
+        print("Löschvorgang abgebrochen.")
+        return
+
+    # Filtere Eintrag heraus (case-insensitive)
+    original_length = len(data)
+    data = [item for item in data if item[name_field].lower() != name.lower()]
+
+    # Prüfe, ob etwas gelöscht wurde
+    if len(data) == original_length:
+        print(f"Fehler beim Löschen von '{name}'.")
+        return
+
+    # Speichere aktualisierte Daten
+    write(file_path, data)
+    print(f"{item_type.capitalize()} '{name}' erfolgreich gelöscht.")
+
 

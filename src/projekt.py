@@ -150,6 +150,7 @@ class Project(Item):
             write(Path(__file__).resolve().parent.parent / 'data' / 'projekte.json', data)
             print(f'{member} dem Projekt "{project_name}" zugewiesen.')
 
+
     @staticmethod #AI assisted
     def assign_task_to_member(project_name, member, task):
         data = read(Path(__file__).resolve().parent.parent / 'data' / 'projekte.json')
@@ -194,3 +195,98 @@ class Project(Item):
         if changed:
             write(Path(__file__).resolve().parent.parent / 'data' / 'projekte.json', data)
             print(f"Aufgabe '{task}' erfolgreich an {member} im Projekt '{project_name}' zugewiesen.")
+
+
+    # AI assisted
+    @staticmethod
+    def remove_member_from_project(project_name, member_name):
+        if not Project.project_exists(project_name):
+            print(f"Das Projekt '{project_name}' existiert nicht.")
+            return False
+
+        if not TeamMember.member_exists(member_name):
+            print(f"Das Teammitglied '{member_name}' existiert nicht.")
+            return False
+
+        projects_path = Path(__file__).resolve().parent.parent / 'data' / 'projekte.json'
+        projects_data = read(projects_path)
+
+        member_found = False
+        for project in projects_data:
+            if project['name'].lower() == project_name.lower():
+                # Entferne aus working_by_person
+                working_by_person = project.get('working_by_person', {})
+                if member_name in working_by_person:
+                    del working_by_person[member_name]
+                    member_found = True
+
+                # Entferne aus working_by_task
+                working_by_task = project.get('working_by_task', {})
+                for task_name, members in list(working_by_task.items()):
+                    if member_name in members:
+                        members.remove(member_name)
+                        if not members:  # Wenn keine Mitglieder mehr, entferne Aufgabe
+                            del working_by_task[task_name]
+
+                project['working_by_person'] = working_by_person
+                project['working_by_task'] = working_by_task
+                break
+
+        if not member_found:
+            print(f"'{member_name}' ist nicht Teil des Projekts '{project_name}'.")
+            return False
+
+        write(projects_path, projects_data)
+        print(f"'{member_name}' wurde aus Projekt '{project_name}' entfernt.")
+        return True
+
+    @staticmethod
+    def remove_task_from_member(project_name, member_name, task_name):
+        if not Project.project_exists(project_name):
+            print(f"Das Projekt '{project_name}' existiert nicht.")
+            return False
+
+        projects_path = Path(__file__).resolve().parent.parent / 'data' / 'projekte.json'
+        projects_data = read(projects_path)
+
+        task_removed = False
+        for project in projects_data:
+            if project['name'].lower() == project_name.lower():
+                working_by_person = project.get('working_by_person', {})
+                working_by_task = project.get('working_by_task', {})
+
+                # Entferne aus working_by_person
+                if member_name in working_by_person:
+                    tasks = working_by_person[member_name]
+                    if isinstance(tasks, list):
+                        if task_name in tasks:
+                            tasks.remove(task_name)
+                            task_removed = True
+                            if not tasks:  # Wenn keine Aufgaben mehr, entferne Mitglied
+                                del working_by_person[member_name]
+                            else:
+                                working_by_person[member_name] = tasks
+                    elif tasks == task_name:  # Einzelner String
+                        del working_by_person[member_name]
+                        task_removed = True
+
+                # Entferne aus working_by_task
+                if task_name in working_by_task:
+                    members = working_by_task[task_name]
+                    if member_name in members:
+                        members.remove(member_name)
+                        task_removed = True
+                        if not members:  # Wenn keine Mitglieder mehr
+                            del working_by_task[task_name]
+
+                project['working_by_person'] = working_by_person
+                project['working_by_task'] = working_by_task
+                break
+
+        if not task_removed:
+            print(f"Aufgabe '{task_name}' ist '{member_name}' nicht zugewiesen.")
+            return False
+
+        write(projects_path, projects_data)
+        print(f"Aufgabe '{task_name}' wurde von '{member_name}' entfernt.")
+        return True
