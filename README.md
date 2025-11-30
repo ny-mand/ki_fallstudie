@@ -32,17 +32,13 @@ Das Tool deckt den kompletten Workflow kleiner Teams ab:
 
 Es sind keine externen Bibliotheken notwendig, nur eine aktuelle Python-Version (3.x).
 
-1.  **Repository klonen oder herunterladen.**
-2.  **Daten-Struktur prüfen:**
-    Es sind **keine externen Bibliotheken** notwendig. Das Projekt nutzt nur Python-Standardbibliotheken (wie `json`, `pathlib`, `datetime`).
 
 1.  **Repository klonen oder herunterladen.**
 2.  **Ordnerstruktur prüfen:**
-    Das Skript erwartet einen `data`-Ordner im Hauptverzeichnis. Falls dieser fehlt, lege ihn bitte an:
+Das Skript erwartet einen `data`-Ordner im Hauptverzeichnis. Falls dieser fehlt, lege ihn und die Dateien `projekte.json`, `teammitglieder.json` und `aufgaben.json` bitte an:
     ```bash
     mkdir data
     ```
-    *(Hinweis: Die JSON-Dateien wie `projekte.json` werden beim ersten Programmstart automatisch generiert, falls sie nicht existieren.)*
 
 3.  **Starten:**
     Führe das Skript über die Kommandozeile aus:
@@ -69,19 +65,19 @@ Hier ein typischer Ablauf, um das Tool kennenzulernen:
 
 ## Projektstruktur
 
-Der Code ist modular aufgebaut (`src/`) und trennt Logik von Benutzeroberfläche:
+Der Code ist modular aufgebaut (`src/`) und trennt Logik von Daten:
 
-* `main.py`: Der Einstiegspunkt des Programms.
-* `cli.py`: Behandelt das Hauptmenü und sämtliche User-Inputs (Controller).
 * `src/`
-    * `item.py`: **Basisklasse** (Parent) für Projekte und Aufgaben (Vererbung).
-    * `projekt.py`: Hauptlogik für Projekte und die Verwaltung der Zuweisungen.
-    * `aufgabe.py`: Logik für Aufgaben-Objekte.
-    * `teammitglied.py`: Verwaltung der Team-Daten.
-    * `dateiverwaltung.py`: Kapselt Lese-/Schreiboperationen (JSON) und Fehlerbehandlung.
-    * `filter.py`: Enthält die Logik für Sortier- und Filterfunktionen (z.B. mittels Lambda).
-    * `utils.py`: Hilfsfunktionen für Input-Validierung und Datumsformatierung.
-* `data/`: Speicherort für die JSON-Dateien (wird automatisch generiert).
+  * `main.py`: Der Einstiegspunkt des Programms.
+  * `cli.py`: Behandelt das Hauptmenü und sämtliche User-Inputs (Controller).
+  * `item.py`: **Basisklasse** (Parent) für Projekte und Aufgaben (Vererbung).
+  * `projekt.py`: Hauptlogik für Projekte und die Verwaltung der Zuweisungen.
+  * `aufgabe.py`: Logik für Aufgaben-Objekte.
+  * `teammitglied.py`: Verwaltung der Team-Daten.
+  * `dateiverwaltung.py`: Kapselt Lese-/Schreiboperationen (JSON) und Fehlerbehandlung.
+  * `filter.py`: Enthält die Logik für Sortier- und Filterfunktionen (z.B. mittels Lambda).
+  * `utils.py`: Hilfsfunktionen für Input-Validierung und Datumsformatierung.
+* `data/`: Speicherort für die JSON-Dateien.
 
 ## Roadmap / Bekannte To-Dos
 
