@@ -3,8 +3,7 @@ from src.dateiverwaltung import *
 from src.utils import *
 
 class TeamMember:
-    def __init__(self, member_id, name, job_title, active_since):
-        self.member_id = member_id
+    def __init__(self, name, job_title, active_since):
         self.name = name
         self.job_title = job_title
         self.active_since = active_since
