@@ -205,7 +205,7 @@ def assign():
             print("Mitglied zum Projekt hinzugefügt.")
 
     elif choice == "2":
-        project_name = get_non_empty_input("Aus welchem Projekt möchtest du ein Mitglied entfernen? ")
+        project_name = get_non_empty_input("Aus welchem Projekt möchtest du eine Aufgabe entfernen? ")
         if not Project.project_exists(project_name):
             print(f"Das Projekt '{project_name}' existiert nicht.")
             return
