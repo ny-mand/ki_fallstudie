@@ -38,11 +38,10 @@ Es sind keine externen Bibliotheken notwendig, nur eine aktuelle Python-Version 
 
 1.  **Repository klonen oder herunterladen.**
 2.  **Ordnerstruktur prüfen:**
-    Das Skript erwartet einen `data`-Ordner im Hauptverzeichnis. Falls dieser fehlt, lege ihn bitte an:
+    Das Skript erwartet einen `data`-Ordner im Hauptverzeichnis. Falls dieser fehlt, lege ihn und die Dateien `projekte.json`, `teammitglieder.json` und `aufgaben.json` bitte an:
     ```bash
     mkdir data
     ```
-    *(Hinweis: Die JSON-Dateien wie `projekte.json` werden beim ersten Programmstart automatisch generiert, falls sie nicht existieren.)*
 
 3.  **Starten:**
     Führe das Skript über die Kommandozeile aus:
