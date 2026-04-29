@@ -1,11 +1,14 @@
 from tkinter import *
 import ctypes
-from views import create_test_screen
-from design_elements import ModernButton as mButton
-from design_elements import ModernEntry as mEntry
-from design_elements import ModernCard as mFrame
-from design_elements import HeaderLabel as hLabel
-from design_elements import TextLabel as tLabel
+
+# Use package-qualified imports so modules are found when the project
+# root is on sys.path (running `src/main.py` directly).
+from src.gui.views import create_test_screen
+from src.gui.design_elements import ModernButton as mButton
+from src.gui.design_elements import ModernEntry as mEntry
+from src.gui.design_elements import ModernCard as mFrame
+from src.gui.design_elements import HeaderLabel as hLabel
+from src.gui.design_elements import TextLabel as tLabel
 
 # Dieser Teil korrigiert die Unschärfe auf Windows
 try:
@@ -23,6 +26,9 @@ root = Tk()
 root.geometry("800x600")
 menu = Menu(root)
 root.config(menu=menu)
+
+def run_gui():
+    root.mainloop()
 
 def raise_screen(screen):
     """Zeigt einen Screen und versteckt andere"""
@@ -47,6 +53,3 @@ menu.add_cascade(label="File", menu=filemenu)
 
 # Initial den Main-Screen zeigen
 raise_screen(frm_main_screen)
-
-if __name__ == "__main__":
-    root.mainloop()

@@ -25,3 +25,8 @@ data/
 # Betriebssystem-Dateien
 .DS_Store
 Thumbs.db
+
+# Python Build-Artefakte
+*.egg-info/
+build/
+dist/
