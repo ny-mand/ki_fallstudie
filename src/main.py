@@ -1,6 +1,6 @@
-from cli import *
+from src.cli import *
 
-# Startpunkt für dsas Programm nach best practices
+# Startpunkt für das Programm nach best practices
 def main():
     run()
 
