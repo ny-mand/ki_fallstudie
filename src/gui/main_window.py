@@ -63,6 +63,8 @@ helpmenu = Menu(menu)
 menu.add_cascade(label="File", menu=filemenu)
 menu.add_cascade(label="Help", menu=helpmenu)
 
+filemenu.add_command(label="Open file", command=dialog_file) # nur Demo, da Hauptprogramm anpassen zu viel Aufwand
+filemenu.add_separator()
 filemenu.add_command(label="Quit", command=dialog_quit)
 
 helpmenu.add_command(label="Open Readme", command=open_readme)
