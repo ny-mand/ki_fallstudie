@@ -6,7 +6,7 @@ import subprocess
 
 # Use package-qualified imports so modules are found when the project
 # root is on sys.path (running `src/main.py` directly).
-from src.gui.views import create_test_screen
+from src.gui.views import *
 from src.gui.design_elements import ModernButton as mButton
 from src.gui.design_elements import ModernEntry as mEntry
 from src.gui.design_elements import ModernCard as mFrame
@@ -69,19 +69,7 @@ filemenu.add_command(label="Quit", command=dialog_quit)
 
 helpmenu.add_command(label="Open Readme", command=open_readme)
 
-# Frames übereinander stapeIn
-frm_main_screen = mFrame(root)
-frm_main_screen.place(relwidth=1, relheight=1)
-
-frm_test_screen = create_test_screen(root)
-frm_test_screen.place(relwidth=1, relheight=1)
-
-# Widgets im Main-Screen
-hLabel(frm_main_screen, text="Hauptscreen").pack(pady=10)
-mButton(frm_main_screen, text="Zum Test-Screen", command=lambda: raise_screen(frm_test_screen)).pack()
-tLabel(frm_main_screen, text="kleiner text").pack()
-mEntry(frm_main_screen).pack()
-
+frm_mainscreen = mainscreen(root)
 
 # Initial den Main-Screen zeigen
-raise_screen(frm_main_screen)
+raise_screen(frm_mainscreen)
