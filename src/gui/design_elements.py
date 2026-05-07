@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import ttk
 
 COLORS = {
     "bg_dark": "#1e1e1e",
@@ -11,6 +12,24 @@ COLORS = {
 
 FONT_MAIN = ("Segoe UI", 10, "bold")
 FONT_BOLD = ("Impact", 11)
+
+def apply_scrollbar_style():
+    style = ttk.Style()
+    # Wir nutzen das 'alt' theme als Basis, da es am anpassungsfähigsten ist
+    style.theme_use('alt')
+    
+    style.configure("Modern.Vertical.TScrollbar",
+                    gripcount=0,
+                    background=COLORS["bg_light"],
+                    darkcolor=COLORS["bg_light"],
+                    lightcolor=COLORS["bg_light"],
+                    troughcolor=COLORS["bg_dark"],
+                    bordercolor=COLORS["border"],
+                    arrowsize=12)
+    
+    # Hover-Effekt für die Scrollbar
+    style.map("Modern.Vertical.TScrollbar",
+              background=[('active', COLORS["accent"]), ('disabled', COLORS["bg_light"])])
 
 class ModernButton(Button):
     def __init__(self, master, text, command=None, **kwargs):
@@ -102,3 +121,43 @@ class TextLabel(Label):
             bg=master.cget("bg"),
             **kwargs
         )
+
+class ModernListbox(Listbox):
+    def __init__(self, master, **kwargs):
+        super().__init__(
+            master,
+            bg=COLORS["bg_light"],
+            fg=COLORS["text"],
+            font=FONT_MAIN,
+            borderwidth=0,
+            highlightthickness=1,
+            highlightbackground=COLORS["border"],
+            highlightcolor=COLORS["accent"], # Farbe des Rahmens bei Fokus
+            selectbackground=COLORS["accent"],
+            selectforeground="white",
+            activestyle="none", # Entfernt Unterstrich beim aktiven Item
+            **kwargs
+        )
+
+class ScrollingListFrame(Frame):
+    def __init__(self, master, **kwargs):
+        super().__init__(master, bg=COLORS["bg_dark"])
+        
+        # Scrollbar erstellen (mit neuem Style)
+        self.scrollbar = ttk.Scrollbar(self, orient="vertical", style="Modern.Vertical.TScrollbar")
+        self.scrollbar.pack(side="right", fill="y")
+
+        # Listbox erstellen
+        self.listbox = ModernListbox(self, yscrollcommand=self.scrollbar.set, **kwargs)
+        self.listbox.pack(side="left", fill="both", expand=True)
+
+        # Scrollbar mit Listbox verknüpfen
+        self.scrollbar.config(command=self.listbox.yview)
+
+    # Hilfsmethoden, um direkt auf die Listbox zuzugreifen
+    def insert(self, index, item):
+        self.listbox.insert(index, item)
+        
+    def get_selected(self):
+        selection = self.listbox.curselection()
+        return self.listbox.get(selection[0]) if selection else None
