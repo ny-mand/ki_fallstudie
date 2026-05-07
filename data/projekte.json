@@ -1,0 +1,32 @@
+[
+  {
+    "project_id": 1,
+    "name": "Website-Relaunch",
+    "description": "Neugestaltung der Unternehmenswebsite.",
+    "date_start": "2026-05-01",
+    "date_due": "2026-06-15",
+    "priority": "hoch",
+    "working_by_person": {},
+    "working_by_task": {}
+  },
+  {
+    "project_id": 2,
+    "name": "App-Prototyp",
+    "description": "Erster klickbarer Prototyp fuer die Mobile-App.",
+    "date_start": "2026-05-08",
+    "date_due": "2026-07-01",
+    "priority": "mittel",
+    "working_by_person": {},
+    "working_by_task": {}
+  },
+  {
+    "project_id": 3,
+    "name": "Reporting-Export",
+    "description": "CSV-Export fuer woechentliche Projektberichte.",
+    "date_start": "2026-05-10",
+    "date_due": "2026-05-30",
+    "priority": "niedrig",
+    "working_by_person": {},
+    "working_by_task": {}
+  }
+]
