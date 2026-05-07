@@ -28,6 +28,9 @@ except Exception:
 
 root = Tk()
 root.geometry("800x600")
+root.title("Projekt-Management-Tool")
+root.rowconfigure(0, weight=1)
+root.columnconfigure(0, weight=1)
 menu = Menu(root)
 root.config(menu=menu)
 
@@ -60,16 +63,17 @@ def open_readme():
 # Menu
 filemenu = Menu(menu)
 helpmenu = Menu(menu)
-menu.add_cascade(label="File", menu=filemenu)
-menu.add_cascade(label="Help", menu=helpmenu)
+menu.add_cascade(label="Datei", menu=filemenu)
+menu.add_cascade(label="Hilfe", menu=helpmenu)
 
-filemenu.add_command(label="Open file", command=dialog_file) # nur Demo, da Hauptprogramm anpassen zu viel Aufwand
+filemenu.add_command(label="Datei öffnen", command=dialog_file) # nur Demo, da Hauptprogramm anpassen zu viel Aufwand
 filemenu.add_separator()
-filemenu.add_command(label="Quit", command=dialog_quit)
+filemenu.add_command(label="Beenden", command=dialog_quit)
 
-helpmenu.add_command(label="Open Readme", command=open_readme)
+helpmenu.add_command(label="Readme öffnen", command=open_readme)
 
 frm_mainscreen = mainscreen(root)
+frm_project_screen = project_screen(root)
 
 # Initial den Main-Screen zeigen
-raise_screen(frm_mainscreen)
+raise_screen(frm_project_screen)
