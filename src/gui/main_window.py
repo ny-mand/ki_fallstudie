@@ -12,6 +12,7 @@ from src.gui.design_elements import ModernEntry as mEntry
 from src.gui.design_elements import ModernCard as mFrame
 from src.gui.design_elements import HeaderLabel as hLabel
 from src.gui.design_elements import TextLabel as tLabel
+from src.gui.design_elements import apply_scrollbar_style
 from src.gui.dialogs import *
 
 # Dieser Teil korrigiert die Unschärfe auf Windows
@@ -27,10 +28,11 @@ except Exception:
         pass
 
 root = Tk()
-root.geometry("800x600")
+root.geometry("1800x1200")
 root.title("Projekt-Management-Tool")
 root.rowconfigure(0, weight=1)
 root.columnconfigure(0, weight=1)
+apply_scrollbar_style()
 menu = Menu(root)
 root.config(menu=menu)
 

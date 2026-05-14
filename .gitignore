@@ -11,6 +11,8 @@ env/
 
 # Daten- und Protokolldateien, die nicht versioniert werden sollen
 data/
+# Ausnahme zu Testzwecken
+!data/projekte.json
 *.log
 
 # Bytecode-Dateien

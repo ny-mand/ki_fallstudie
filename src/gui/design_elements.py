@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import ttk
 
 COLORS = {
     "bg_dark": "#1e1e1e",
@@ -12,27 +13,76 @@ COLORS = {
 FONT_MAIN = ("Segoe UI", 10, "bold")
 FONT_BOLD = ("Impact", 11)
 
+def apply_scrollbar_style():
+    style = ttk.Style()
+    # Wir nutzen das 'alt' theme als Basis, da es am anpassungsfähigsten ist
+    style.theme_use('alt')
+    
+    style.configure("Modern.Vertical.TScrollbar",
+                    gripcount=0,
+                    background=COLORS["bg_light"],
+                    darkcolor=COLORS["bg_light"],
+                    lightcolor=COLORS["bg_light"],
+                    troughcolor=COLORS["bg_dark"],
+                    bordercolor=COLORS["border"],
+                    arrowsize=12)
+    
+    # Hover-Effekt für die Scrollbar
+    style.map("Modern.Vertical.TScrollbar",
+              background=[('active', COLORS["accent"]), ('disabled', COLORS["bg_light"])])
+    
+    # Treeview Styling
+    style.configure("Modern.Treeview",
+                    background=COLORS["bg_light"],
+                    foreground=COLORS["text"],
+                    fieldbackground=COLORS["bg_light"],
+                    font=FONT_MAIN,
+                    rowheight=56,
+                    borderwidth=0,
+                    relief="flat")
+    
+    style.configure("Modern.Treeview.Heading",
+                    background=COLORS["bg_dark"],
+                    foreground=COLORS["text"],
+                    font=("Segoe UI", 10, "bold"),
+                    borderwidth=0)
+    
+    style.map("Modern.Treeview",
+              background=[('selected', COLORS["accent"])],
+              foreground=[('selected', 'white')])
+    
+    style.map("Modern.Treeview.Heading",
+              background=[('active', COLORS["hover"])])
+
 class ModernButton(Button):
     def __init__(self, master, text, command=None, **kwargs):
         # Standard-Design-Definitionen
         self.default_bg = "#2e9acc"  # Schönes Grün
         self.hover_bg = "#207ba9"    # Dunkleres Grün für Hover
         self.fg_color = "white"
-        self.font = FONT_MAIN
+        self.font = kwargs.pop("font", FONT_MAIN)
+        bg = kwargs.pop("bg", self.default_bg)
+        fg = kwargs.pop("fg", self.fg_color)
+        bd = kwargs.pop("bd", 0)
+        padx = kwargs.pop("padx", 20)
+        pady = kwargs.pop("pady", 10)
+        activebackground = kwargs.pop("activebackground", self.hover_bg)
+        activeforeground = kwargs.pop("activeforeground", "white")
+        cursor = kwargs.pop("cursor", "hand2")
 
         super().__init__(
             master, 
             text=text, 
             command=command,
-            bg=self.default_bg,
-            fg=self.fg_color,
+            bg=bg,
+            fg=fg,
             font=self.font,
-            bd=0,                   # Entfernt den hässlichen Rahmen
-            padx=20,
-            pady=10,
-            activebackground=self.hover_bg,
-            activeforeground="white",
-            cursor="hand2",         # Zeigt den Mauszeiger-Finger
+            bd=bd,                   # Entfernt den hässlichen Rahmen
+            padx=padx,
+            pady=pady,
+            activebackground=activebackground,
+            activeforeground=activeforeground,
+            cursor=cursor,         # Zeigt den Mauszeiger-Finger
             **kwargs
         )
 
@@ -102,3 +152,89 @@ class TextLabel(Label):
             bg=master.cget("bg"),
             **kwargs
         )
+
+class ModernListbox(Listbox):
+    def __init__(self, master, **kwargs):
+        super().__init__(
+            master,
+            bg=COLORS["bg_light"],
+            fg=COLORS["text"],
+            font=FONT_MAIN,
+            borderwidth=0,
+            highlightthickness=1,
+            highlightbackground=COLORS["border"],
+            highlightcolor=COLORS["accent"], # Farbe des Rahmens bei Fokus
+            selectbackground=COLORS["accent"],
+            selectforeground="white",
+            activestyle="none", # Entfernt Unterstrich beim aktiven Item
+            **kwargs
+        )
+
+class ScrollingListFrame(Frame):
+    def __init__(self, master, **kwargs):
+        super().__init__(master, bg=COLORS["bg_dark"])
+        
+        # Scrollbar erstellen (mit neuem Style)
+        self.scrollbar = ttk.Scrollbar(self, orient="vertical", style="Modern.Vertical.TScrollbar")
+        self.scrollbar.pack(side="right", fill="y")
+
+        # Listbox erstellen
+        self.listbox = ModernListbox(self, yscrollcommand=self.scrollbar.set, **kwargs)
+        self.listbox.pack(side="left", fill="both", expand=True)
+
+        # Scrollbar mit Listbox verknüpfen
+        self.scrollbar.config(command=self.listbox.yview)
+
+    # Hilfsmethoden, um direkt auf die Listbox zuzugreifen
+    def insert(self, index, item):
+        self.listbox.insert(index, item)
+        
+    def get_selected(self):
+        selection = self.listbox.curselection()
+        return self.listbox.get(selection[0]) if selection else None
+
+class ModernTreeview(Frame):
+    """Styled Treeview mit Scrollbar für Tabellendarstellung"""
+    def __init__(self, master, columns=None, **kwargs):
+        super().__init__(master, bg=master.cget("bg"))
+        
+        # Scrollbars
+        self.vsb = ttk.Scrollbar(self, orient="vertical", style="Modern.Vertical.TScrollbar")
+        
+        # Treeview erstellen
+        self.tree = ttk.Treeview(
+            self,
+            columns=columns or [],
+            style="Modern.Treeview",
+            yscrollcommand=self.vsb.set,
+            **kwargs
+        )
+        
+        # Layout
+        self.tree.grid(row=0, column=0, sticky="nsew")
+        self.vsb.grid(row=0, column=1, sticky="ns")
+        
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        
+        # Scrollbars verknüpfen
+        self.vsb.config(command=self.tree.yview)
+    
+    def heading(self, col, **kwargs):
+        """Spalte konfigurieren"""
+        self.tree.heading(col, **kwargs)
+    
+    def column(self, col, **kwargs):
+        """Spaltenbreite/Ausrichtung setzen"""
+        # stretch=True ermöglicht, dass sich Spalten an Fensterbreite anpassen
+        if 'stretch' not in kwargs:
+            kwargs['stretch'] = True
+        self.tree.column(col, **kwargs)
+    
+    def insert(self, parent, index, iid=None, **kwargs):
+        """Zeile einfügen"""
+        return self.tree.insert(parent, index, iid=iid, **kwargs)
+    
+    def item(self, item, **kwargs):
+        """Item-Daten abrufen/setzen"""
+        return self.tree.item(item, **kwargs)
