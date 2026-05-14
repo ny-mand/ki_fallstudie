@@ -21,11 +21,38 @@ def create_test_screen(parent):
     return frm_test_screen
 
 def mainscreen(parent):
-    pass
+    frame = ModernCard(parent)
+    frame.place(x=0, y=0, relwidth=1, relheight=1)
+    frame.columnconfigure(0, weight=1)
+    frame.rowconfigure(1, weight=1)
+
+    header_label = HeaderLabel(frame, text="Projektmanagement - Hauptmenü")
+    header_label.grid(columnspan=2)
+
+    projects_button = ModernButton(frame, text="Projekte anzeigen")
+    projects_button.grid(row=1)
+
+    projects_button = ModernButton(frame, text="Projekt erstellen")
+    projects_button.grid(row=1, column=1)
+
+    projects_button = ModernButton(frame, text="Member anzeigen")
+    projects_button.grid(row=2)
+
+    projects_button = ModernButton(frame, text="Member hinzufügen")
+    projects_button.grid(row=2, column=1)
+
+    projects_button = ModernButton(frame, text="Aufgaben anzeigen")
+    projects_button.grid(row=3)
+
+    projects_button = ModernButton(frame, text="Aufgabe hinzufügen")
+    projects_button.grid(row=3, column=1)
+
+    return frame
 
 def project_screen(parent):
     frame = ModernCard(parent)
     frame.grid(row=0, column=0, sticky="nsew")
+    # frame.place(x=0, y=0, relwidth=1, relheight=1)
     frame.columnconfigure(0, weight=1)
     frame.rowconfigure(1, weight=1)
 

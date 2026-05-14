@@ -76,4 +76,4 @@ frm_mainscreen = mainscreen(root)
 frm_project_screen = project_screen(root)
 
 # Initial den Main-Screen zeigen
-raise_screen(frm_project_screen)
+raise_screen(frm_mainscreen)
