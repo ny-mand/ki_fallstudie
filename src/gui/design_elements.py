@@ -54,11 +54,11 @@ def apply_scrollbar_style():
     style.map("Modern.Treeview.Heading",
               background=[('active', COLORS["hover"])])
 
-class ModernButton(Button):
+class ModernButton(Button): # per **kwargs gut anpassbar, bedarf andere Elemente nach gleichem Prinzip anpassen
     def __init__(self, master, text, command=None, **kwargs):
         # Standard-Design-Definitionen
-        self.default_bg = "#2e9acc"  # Schönes Grün
-        self.hover_bg = "#207ba9"    # Dunkleres Grün für Hover
+        self.default_bg = "#2e9acc"  # Schönes Blau
+        self.hover_bg = "#207ba9"    # Dunkleres Blau für Hover
         self.fg_color = "white"
         self.font = kwargs.pop("font", FONT_MAIN)
         bg = kwargs.pop("bg", self.default_bg)
@@ -238,3 +238,21 @@ class ModernTreeview(Frame):
     def item(self, item, **kwargs):
         """Item-Daten abrufen/setzen"""
         return self.tree.item(item, **kwargs)
+
+    def selection(self):
+        """Gibt die aktuell ausgewählten Treeview-Items zurück."""
+        return self.tree.selection()
+
+    def get_selected_values(self):
+        """Gibt die Werte der ersten ausgewählten Zeile zurück."""
+        selection = self.selection()
+        if not selection:
+            return None
+        return self.tree.item(selection[0], "values")
+
+    def get_selected_name(self):
+        """Gibt den Projektnamen aus der ersten ausgewählten Zeile zurück."""
+        values = self.get_selected_values()
+        return values[1] if values and len(values) > 1 else None
+    
+# TODO ttk.combobox als dropdown menu hinzufügen
