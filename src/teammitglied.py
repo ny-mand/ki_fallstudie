@@ -19,7 +19,7 @@ class TeamMember:
         return False
 
     @staticmethod
-    def add_member(active_since = dt.datetime.now().date().isoformat()):
+    def add_member(name, job_title, active_since = dt.datetime.now().date().isoformat()):
         data = read((Path(__file__).resolve().parent.parent / 'data' / 'teammitglieder.json'))
         # Generiere neue ID basierend auf letzter ID oder starte bei 1
         if data:
@@ -28,25 +28,22 @@ class TeamMember:
             new_id = 1
 
         # Benutzereingaben sammeln
-        name_input = get_non_empty_input("Gib den Namen des Teammitglieds ein: ")
-        if TeamMember.member_exists(name_input):
-            print(f"Ein Teammitglied mit dem Namen '{name_input}' existiert bereits.")
+        if TeamMember.member_exists(name):
+            print(f"Ein Teammitglied mit dem Namen '{name}' existiert bereits.")
             return
 
-        job_title_input = get_non_empty_input("Gib die Berufsbezeichnung des Teammitglieds ein: ")
-        active_since_input = input("Gib das Eintrittsdatum ein (YYYY-MM-DD) oder leer lassen: ").strip()
         # Validierung des Datumsformats, falls eingegeben
-        while active_since_input != "" and not validate_date_format(active_since_input):
-            print("Ungültiges Datumsformat. Bitte benutze YYYY-MM-DD.")
-            active_since_input = input("Gib das Eintrittsdatum ein (YYYY-MM-DD) oder leer lassen: ").strip()
+        while not validate_date_format(active_since):
+            print("Ungültiges Datumsformat. Bitte benutze YYYY-MM-DD.") # TODO anders handlen
+
         # Erstelle Teammitglied-Dictionary
         new_member = {
             "member_id": new_id,
-            "name": name_input,
-            "job_title": job_title_input,
-            "active_since": active_since_input if active_since_input != "" else active_since  # Verwende aktuelles Datum, falls leer
+            "name": name,
+            "job_title": job_title,
+            "active_since": active_since
         }
         # Speichere neues Teammitglied
         data.append(new_member)
         write((Path(__file__).resolve().parent.parent / 'data' / 'teammitglieder.json'), data)
-        print("Neues Teammitglied hinzugefügt:", name_input)
+        print("Neues Teammitglied hinzugefügt:", name)
