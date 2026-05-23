@@ -44,7 +44,7 @@ class Project(Item):
         return True
 
     @staticmethod
-    def create_project():
+    def create_project(name, description, date_start, date_due, priority):
         data = read((Path(__file__).resolve().parent.parent / 'data' / 'projekte.json'))
         # Generiere neue ID basierend auf letzter ID oder starte bei 1
         if data:
@@ -52,39 +52,26 @@ class Project(Item):
         else:
             new_id = 1
 
-        # Benutzereingaben sammeln
-        name_input = get_non_empty_input("Gib den Namen des Projekts ein: ")
-        if Project.project_exists(name_input):
-            print(f"Ein Projekt mit dem Namen '{name_input}' existiert bereits.")
+        if Project.project_exists(name):
+            print(f"Ein Projekt mit dem Namen '{name}' existiert bereits.")
             return
 
-        description_input = get_non_empty_input("Gib eine Beschreibung des Projekts ein: ")
-        date_start_input = get_non_empty_input("Gib das Startdatum des Projekts ein (YYYY-MM-DD): ")
         # Validierung des Datumsformats
-        while not validate_date_format(date_start_input):
+        while not validate_date_format(date_start): # TODO mit Fehlermeldung anders umgehen
             print("Ungültiges Datumsformat. Bitte benutze YYYY-MM-DD.")
-            date_start_input = get_non_empty_input("Gib das Startdatum des Projekts ein (YYYY-MM-DD): ")
 
-        date_due_input = get_non_empty_input("Gib das Fälligkeitsdatum des Projekts ein (YYYY-MM-DD): ")
         # Validierung des Datumsformats
-        while not validate_date_format(date_due_input):
+        while not validate_date_format(date_due): # TODO s.o.
             print("Ungültiges Datumsformat. Bitte benutze YYYY-MM-DD.")
-            date_due_input = get_non_empty_input("Gib das Fälligkeitsdatum des Projekts ein (YYYY-MM-DD): ")
 
-        while date_start_input > date_due_input:
+        while date_start > date_due:
             print("Das Fälligkeitsdatum muss nach dem Startdatum liegen.")
-            date_due_input = get_non_empty_input("Gib das Fälligkeitsdatum des Projekts ein (YYYY-MM-DD): ")
-            while not validate_date_format(date_due_input):
-                print("Ungültiges Datumsformat. Bitte benutze YYYY-MM-DD.")
-                date_due_input = get_non_empty_input("Gib das Fälligkeitsdatum des Projekts ein (YYYY-MM-DD): ")
 
-        priority_input = get_non_empty_input("Gib die Priorität des Projekts ein (niedrig (1), mittel (2), hoch (3)): ")
-        while not priority_input in ["1", "2", "3"]: # Validierung der Prioritätseingabe
-            print("Ungültige Eingabe. Bitte gib 1, 2 oder 3 ein.")
-            priority_input = get_non_empty_input("Gib die Priorität des Projekts ein (niedrig (1), mittel (2), hoch (3)): ").strip()
+        while not priority in ["1", "2", "3"]: # Validierung der Prioritätseingabe
+            print("Ungültige Eingabe. Bitte gib 1, 2 oder 3 ein.") # TODO s.o.
 
         # Konvertiere Zahl in Prioritätstext
-        priority = "niedrig" if priority_input == "1" else "mittel" if priority_input == "2" else "hoch"
+        priority = "niedrig" if priority == "1" else "mittel" if priority == "2" else "hoch"
         # Initialisiere leere Zuordnungen
         working_by_person = {}
         working_by_task = {}
@@ -92,10 +79,10 @@ class Project(Item):
         # Erstelle Projekt-Dictionary
         new_project = {
             "project_id": new_id,
-            "name": name_input,
-            "description": description_input,
-            "date_start": date_start_input,
-            "date_due": date_due_input,
+            "name": name,
+            "description": description,
+            "date_start": date_start,
+            "date_due": date_due,
             "priority": priority,
             "working_by_person": working_by_person,
             "working_by_task": working_by_task
@@ -103,17 +90,13 @@ class Project(Item):
         # Speichere neues Projekt
         data.append(new_project)
         write((Path(__file__).resolve().parent.parent / 'data' / 'projekte.json'), data)
-        print("Neues Projekt hinzugefügt:", name_input)
-        return name_input
+        print("Neues Projekt hinzugefügt:", name)
+        return name
 
     @staticmethod #AI assisted
     def assign_member_to_project(project_name, member, task=None):
         data = read(Path(__file__).resolve().parent.parent / 'data' / 'projekte.json')
         changed = False
-
-        # Optional: Frage nach Aufgabenzuweisung
-        if input("Möchtest du eine Aufgabe zuweisen? (j/n): ").strip().lower() == "j":
-            task = get_non_empty_input("Gib den Namen der Aufgabe ein: ")
 
         # Validiere, dass Projekt, Mitglied und Aufgabe existieren
         if not Project.validate_existence(project_name, member, task):
