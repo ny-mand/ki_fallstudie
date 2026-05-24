@@ -4,6 +4,9 @@ from src.gui.design_elements import *
 from src.dateiverwaltung import read
 from src.logic import *
 from src.projekt import Project
+from tkinter import ttk  # Wird für das Dropdown-Menü (Combobox) benötigt
+from src.dateiverwaltung import read
+from src.utils import validate_date_format, format_to_german_date
 
 def create_test_screen(parent):
     """Erstellt den Test-Screen Frame"""
@@ -63,9 +66,11 @@ def project_screen(parent):
     projects = read(file_path)
 
     # TODO in logic verschieben?
-    def refresh_projects():
+    def refresh_projects(data_to_show=None):
         proj_treeview.tree.delete(*proj_treeview.tree.get_children())
-        for project in read(file_path):
+        # Wenn keine gefilterten Daten übergeben wurden, lade alle Projekte neu
+        display_list = data_to_show if data_to_show is not None else read(file_path)
+        for project in display_list:
             proj_treeview.insert(
                 "",
                 "end",
@@ -86,8 +91,111 @@ def project_screen(parent):
         refresh_projects()
 
     def create_new_project():
+        Project.create_project()
+        refresh_projects()
+
+    def delete_selected_project():
+        selected_name = proj_treeview.get_selected_name()
+        if not selected_name:
+            return
+        delete_item("projekt", selected_name)
+        refresh_projects()
+
+    def create_new_project():
         Project.create_project() #TODO austauschen mit raise_screen(create_project_screen)
         refresh_projects()
+
+    def open_filter_window():
+        filter_popup = Toplevel(parent)
+        filter_popup.title("Projekte filtern & sortieren")
+        filter_popup.geometry("460x260")
+        filter_popup.configure(bg="#2d2d2d")
+        filter_popup.resizable(False, False)
+
+        Label(filter_popup, text="Filter / Sortierung wählen:", bg="#2d2d2d", fg="white",
+              font=("Segoe UI", 10, "bold")).pack(pady=(15, 5))
+
+        choice_var = StringVar()
+        filter_choice = ttk.Combobox(filter_popup, textvariable=choice_var, state="readonly", width=42)
+        filter_choice["values"] = [
+            "Alle Projekte anzeigen",
+            "Nach bestimmter Priorität filtern",
+            "Nach Startdatum filtern (ab Datum)",
+            "Nach Fälligkeitsdatum sortieren (aufsteigend)",
+            "Nach Priorität sortieren (hoch -> niedrig)"
+        ]
+        filter_choice.pack(pady=5)
+        filter_choice.current(0)
+
+        # Bereich für dynamische Eingabefelder (je nach Filter-Modus)
+        param_frame = Frame(filter_popup, bg="#2d2d2d")
+        param_frame.pack(pady=10, fill="x")
+
+        param_label = Label(param_frame, text="Wert:", bg="#2d2d2d", fg="white")
+        param_entry = Entry(param_frame, width=20, bg="#1e1e1e", fg="white", insertbackground="white", bd=1,
+                            relief="flat")
+        param_prio = ttk.Combobox(param_frame, values=["niedrig", "mittel", "hoch"], state="readonly", width=15)
+
+        # Steuert, welche Felder sichtbar sind
+        def on_choice_changed(event):
+            param_label.pack_forget()
+            param_entry.pack_forget()
+            param_prio.pack_forget()
+
+            mode = choice_var.get()
+            if mode == "Nach bestimmter Priorität filtern":
+                param_label.config(text="Priorität wählen:")
+                param_label.pack(side="left", padx=(60, 5))
+                param_prio.pack(side="left", padx=5)
+                param_prio.current(0)
+            elif mode == "Nach Startdatum filtern (ab Datum)":
+                param_label.config(text="Datum (YYYY-MM-DD):")
+                param_label.pack(side="left", padx=(60, 5))
+                param_entry.pack(side="left", padx=5)
+                param_entry.delete(0, END)
+
+        filter_choice.bind("<<ComboboxSelected>>", on_choice_changed)
+
+        # Verarbeitet die Auswahl analog src/filter.py
+        def apply_and_close():
+            all_projects = read(file_path)
+            mode = choice_var.get()
+            filtered_result = []
+
+            if mode == "Alle Projekte anzeigen":
+                filtered_result = all_projects
+
+            elif mode == "Nach bestimmter Priorität filtern":
+                target_prio = param_prio.get()
+                filtered_result = [p for p in all_projects if p.get('priority', '').lower() == target_prio.lower()]
+
+            elif mode == "Nach Startdatum filtern (ab Datum)":
+                target_date = param_entry.get().strip()
+                # Gruppen-Validierungsfunktion aus utils.py
+                if not validate_date_format(target_date):
+                    from tkinter import messagebox
+                    messagebox.showerror("Fehler", "Ungültiges Datumsformat! Bitte YYYY-MM-DD nutzen.",
+                                         parent=filter_popup)
+                    return
+                filtered_result = [p for p in all_projects if
+                                   p.get('date_start') and p.get('date_start') >= target_date]
+
+            elif mode == "Nach Fälligkeitsdatum sortieren (aufsteigend)":
+                all_projects.sort(key=lambda p: p.get('date_due', ''))
+                filtered_result = all_projects
+
+            elif mode == "Nach Priorität sortieren (hoch -> niedrig)":
+                prio_map = {"hoch": 3, "mittel": 2, "niedrig": 1}
+                all_projects.sort(key=lambda p: prio_map.get(p.get('priority', '').lower(), 0), reverse=True)
+                filtered_result = all_projects
+
+            # Aktualisiert das Hauptfenster mit den gefilterten Daten
+            refresh_projects(filtered_result)
+            filter_popup.destroy()
+
+        apply_btn = ModernButton(filter_popup, text="Anwenden", command=apply_and_close)
+        apply_btn.pack(pady=15)
+
 
     # Treeview für Projektübersicht
     proj_treeview = ModernTreeview(proj_list, columns=("id", "name", "description", "priority", "due_date"))
@@ -126,10 +234,13 @@ def project_screen(parent):
             )
         )
 
-    filter = ModernButton(controls, text="Filtern")
+
+    filter = ModernButton(controls, text="Filtern", command=open_filter_window)
     filter.grid(row=0, column=0, sticky="ew", padx=(80, 80))
+
     create = ModernButton(controls, text="Erstellen", command=create_new_project)
     create.grid(row=0, column=1, sticky="ew", padx=7)
+
     delete = ModernButton(
         controls,
         text="Löschen",
@@ -138,6 +249,9 @@ def project_screen(parent):
     delete.grid(row=0, column=2, sticky="ew", padx=(80, 80))
 
     return frame
+
+
+
 
 def member_screen(parent):
     pass
