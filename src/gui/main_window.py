@@ -74,8 +74,10 @@ filemenu.add_command(label="Beenden", command=dialog_quit)
 
 helpmenu.add_command(label="Readme öffnen", command=open_readme)
 
-frm_mainscreen = mainscreen(root)
 frm_project_screen = project_screen(root)
+frm_mainscreen = mainscreen(root, project_screen=frm_project_screen)
+
+root.bind("<<ShowMainScreen>>", lambda event: raise_screen(frm_mainscreen))
 
 # Initial den Main-Screen zeigen
 raise_screen(frm_mainscreen)
