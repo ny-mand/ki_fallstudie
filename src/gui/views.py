@@ -254,7 +254,111 @@ def project_screen(parent):
 
 
 def member_screen(parent):
-    pass
+    frame = ModernCard(parent)
+    frame.grid(row=0, column=0, sticky="nsew")
+    frame.columnconfigure(0, weight=1)
+    frame.rowconfigure(1, weight=0)
+    frame.rowconfigure(2, weight=1)
+
+    file_path = Path(__file__).resolve().parent.parent.parent / "data" / "teammitglieder.json"
+
+    # Head
+    head = ModernCard(frame)
+    head.columnconfigure(0, weight=0)
+    head.columnconfigure(1, weight=1)
+    head.grid(row=0, column=0, sticky="ew", pady=(0, 12))
+
+    back_button = ModernButton(head, text="◀", font=("Segoe UI", 13, "bold"), padx=14, pady=8)
+    back_button.grid(row=0, column=0, sticky="w")
+
+    header = HeaderLabel(head, text="Teammitglieder")
+    header.grid(row=0, column=1, sticky="w", padx=(50, 0))
+
+    # Buttons
+    controls = ModernCard(frame)
+    controls.columnconfigure(0, weight=1)
+    controls.columnconfigure(1, weight=1)
+    controls.columnconfigure(2, weight=1)
+    controls.grid(row=1, column=0, sticky="ew", pady=(0, 12))
+
+    # List
+    member_list = ModernCard(frame)
+    member_list.grid(row=2, column=0, sticky="nsew")
+    member_list.columnconfigure(0, weight=1)
+    member_list.rowconfigure(0, weight=1)
+
+    def refresh_members(data_to_show=None):
+        member_treeview.tree.delete(*member_treeview.tree.get_children())
+        display_list = data_to_show if data_to_show is not None else read(file_path)
+
+        for member in display_list:
+            member_treeview.insert(
+                "",
+                "end",
+                values=(
+                    member.get("member_id", ""),
+                    member.get("name", ""),
+                    member.get("job_title", ""),
+                    member.get("active_since", "")
+                )
+            )
+
+    def delete_selected_team_member():
+        selected_name = member_treeview.get_selected_name()
+        if not selected_name:
+            return
+        delete_item("teammitglied", selected_name)
+        refresh_members()
+
+    def create_new_team_member():
+        # TODO austauschen mit raise_screen(create_member_screen)
+        pass
+
+    def assign_selected_task_to_member():
+        selected_name = member_treeview.get_selected_name()
+        if not selected_name:
+            return
+        assign("assign task", task_name=selected_name)
+
+    def unassign_selected_task_from_member():
+        selected_name = member_treeview.get_selected_name()
+        if not selected_name:
+            return
+        assign("unassign task", task_name=selected_name)
+
+    member_treeview = ModernTreeview(
+        member_list,
+        columns=("id", "name", "job_title", "active_since")
+    )
+    member_treeview.grid(row=0, column=0, sticky="nsew")
+
+    member_treeview.tree.heading("#0", text="")
+    member_treeview.tree.column("#0", width=0, stretch=False)
+
+    member_treeview.heading("id", text="ID")
+    member_treeview.column("id", width=60, anchor="center", stretch=False)
+
+    member_treeview.heading("name", text="Name")
+    member_treeview.column("name", width=180, anchor="w")
+
+    member_treeview.heading("job_title", text="Jobtitel")
+    member_treeview.column("job_title", width=220, anchor="w")
+
+    member_treeview.heading("active_since", text="Aktiv seit")
+    member_treeview.column("active_since", width=160, anchor="center", stretch=False)
+
+    refresh_members()
+
+    assign_button = ModernButton(controls, text="Zuweisen", command=assign_selected_task_to_member)
+    assign_button.grid(row=0, column=0, sticky="ew", padx=(80, 7))
+
+    create_button = ModernButton(controls, text="Erstellen", command=create_new_team_member)
+    create_button.grid(row=0, column=1, sticky="ew", padx=7)
+
+    delete_button = ModernButton(controls, text="Löschen", command=delete_selected_team_member)
+    delete_button.grid(row=0, column=2, sticky="ew", padx=(7, 80))
+
+    return frame
     # nutzt TeamMember.add_member() zum erstellen -> TODO def create_new_team_member() wie in project_screen
     # nutzt delete_item("teammitglied", selected_name) zum löschen -> TODO def delete_selected_team_member()
     # nutzt assign("assign task", task_name=selected_name)
