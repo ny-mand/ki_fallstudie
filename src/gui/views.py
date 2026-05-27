@@ -28,7 +28,7 @@ def create_test_screen(parent):
 def mainscreen(parent):
     pass
 
-def project_screen(parent):
+def project_screen(parent, back_screen):
     frame = ModernCard(parent)
     frame.grid(row=0, column=0, sticky="nsew")
     frame.columnconfigure(0, weight=1)
@@ -43,7 +43,7 @@ def project_screen(parent):
     head.columnconfigure(1, weight=1)
     head.grid(row=0, column=0, sticky="ew", pady=(0, 12))
 
-    back_button = ModernButton(head, text="◀", font=("Segoe UI", 13, "bold"), padx=14, pady=8)
+    back_button = ModernButton(head, text="◀", command=lambda: raise_screen(back_screen), font=("Segoe UI", 13, "bold"), padx=14, pady=8)
     back_button.grid(row=0, column=0, sticky="w")
 
     header = HeaderLabel(head, text="Projekte")
