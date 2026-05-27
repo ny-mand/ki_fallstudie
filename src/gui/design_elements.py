@@ -117,11 +117,14 @@ class ModernEntry(Frame):
     
 class ModernCard(Frame):
     def __init__(self, master, **kwargs):
+        padx = kwargs.pop("padx", 15)
+        pady = kwargs.pop("pady", 15)
+        
         super().__init__(
             master, 
             bg=COLORS["bg_light"], 
-            padx=15, 
-            pady=15, 
+            padx=padx, 
+            pady=pady, 
             highlightbackground=COLORS["border"],
             highlightthickness=1,
             **kwargs

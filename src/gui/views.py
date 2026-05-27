@@ -25,12 +25,48 @@ def create_test_screen(parent):
 
     return frm_test_screen
 
-def mainscreen(parent):
-    pass
+def mainscreen(parent, project_screen=None):
+    frame = ModernCard(parent, padx=75, pady=75)
+    frame.place(x=0, y=0, relwidth=1, relheight=1)
+    
+    # Konfiguriere die Spalten und Zeilen
+    frame.columnconfigure(0, weight=1)
+    frame.columnconfigure(1, weight=1)
+    frame.rowconfigure(0, weight=0)  # Header - feste Größe
+    frame.rowconfigure(1, weight=1)  # Button-Zeile 1
+    frame.rowconfigure(2, weight=1)  # Button-Zeile 2
+    frame.rowconfigure(3, weight=1)  # Button-Zeile 3
 
-def project_screen(parent):
+    header_label = HeaderLabel(frame, text="Projektmanagement - Hauptmenü")
+    header_label.grid(row=0, columnspan=2, sticky="ew", pady=(0, 40))
+
+    # Erste Reihe
+    projects_button = ModernButton(frame, text="Projekte anzeigen", command=lambda: project_screen.tkraise() if project_screen else None, padx=35, pady=22, font=("Segoe UI", 12, "bold"))
+    projects_button.grid(row=1, column=0, sticky="nsew", padx=(0, 36), pady=(0, 36))
+
+    create_project_button = ModernButton(frame, text="Projekt erstellen", padx=35, pady=22, font=("Segoe UI", 12, "bold"))
+    create_project_button.grid(row=1, column=1, sticky="nsew", padx=(36, 0), pady=(0, 36))
+
+    # Zweite Reihe
+    member_button = ModernButton(frame, text="Member anzeigen", padx=35, pady=22, font=("Segoe UI", 12, "bold"))
+    member_button.grid(row=2, column=0, sticky="nsew", padx=(0, 36), pady=(0, 36))
+
+    add_member_button = ModernButton(frame, text="Member hinzufügen", padx=35, pady=22, font=("Segoe UI", 12, "bold"))
+    add_member_button.grid(row=2, column=1, sticky="nsew", padx=(36, 0), pady=(0, 36))
+
+    # Dritte Reihe
+    tasks_button = ModernButton(frame, text="Aufgaben anzeigen", padx=35, pady=22, font=("Segoe UI", 12, "bold"))
+    tasks_button.grid(row=3, column=0, sticky="nsew", padx=(0, 36), pady=0)
+
+    add_task_button = ModernButton(frame, text="Aufgabe hinzufügen", padx=35, pady=22, font=("Segoe UI", 12, "bold"))
+    add_task_button.grid(row=3, column=1, sticky="nsew", padx=(36, 0), pady=0)
+
+    return frame
+
+def project_screen(parent, back_screen):
     frame = ModernCard(parent)
     frame.grid(row=0, column=0, sticky="nsew")
+    # frame.place(x=0, y=0, relwidth=1, relheight=1)
     frame.columnconfigure(0, weight=1)
     frame.rowconfigure(1, weight=1)
     frame.rowconfigure(2, weight=1)
@@ -43,7 +79,7 @@ def project_screen(parent):
     head.columnconfigure(1, weight=1)
     head.grid(row=0, column=0, sticky="ew", pady=(0, 12))
 
-    back_button = ModernButton(head, text="◀", font=("Segoe UI", 13, "bold"), padx=14, pady=8)
+    back_button = ModernButton(head, text="◀", command=lambda: raise_screen(back_screen), font=("Segoe UI", 13, "bold"), padx=14, pady=8)
     back_button.grid(row=0, column=0, sticky="w")
 
     header = HeaderLabel(head, text="Projekte")

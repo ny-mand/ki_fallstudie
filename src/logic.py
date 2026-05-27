@@ -6,6 +6,32 @@ from src.aufgabe import Task
 from src.projekt import Project
 from src.utils import *
 from src.gui.dialogs import *
+import os
+import platform
+import subprocess
+
+def raise_screen(screen):
+    """Zeigt einen Screen und versteckt andere"""
+    screen.tkraise()
+
+def open_readme():
+    """Öffnet die Readme.md um die Funktionen nachschlagen zu können"""
+    # Ermittelt das Verzeichnis, in dem dieses Skript liegt
+    # Pfad der aktuellen Datei (ki_fallstudie/src/gui/dein_skript.py)
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    # Zwei Ebenen nach oben gehen, um in root zu landen
+    project_root = os.path.dirname(os.path.dirname(current_dir))
+    dateipfad = os.path.join(project_root, "README.md")
+
+    if os.path.exists(dateipfad):
+        if platform.system() == "Windows":
+            os.startfile(dateipfad)
+        elif platform.system() == "Darwin":
+            subprocess.Popen(["open", dateipfad])
+        else:
+            subprocess.Popen(["xdg-open", dateipfad])
+    else:
+        print(f"Fehler: Datei nicht gefunden unter {dateipfad}")
 
 def assign(choice, project_name=None, member_name=None, task_name=None):
     if choice == "assign task":
