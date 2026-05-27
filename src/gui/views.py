@@ -401,7 +401,115 @@ def member_screen(parent):
     # nutzt assign("unassign task", task_name=selected_name)
 
 def task_screen(parent):
-    pass
+    frame = ModernCard(parent)
+    frame.grid(row=0, column=0, sticky="nsew")
+    frame.columnconfigure(0, weight=1)
+    frame.rowconfigure(1, weight=0)
+    frame.rowconfigure(2, weight=1)
+
+    file_path = Path(__file__).resolve().parent.parent.parent / "data" / "aufgaben.json"
+
+    # Head
+    head = ModernCard(frame)
+    head.columnconfigure(0, weight=0)
+    head.columnconfigure(1, weight=1)
+    head.grid(row=0, column=0, sticky="ew", pady=(0, 12))
+
+    back_button = ModernButton(head, text="◀", font=("Segoe UI", 13, "bold"), padx=14, pady=8)
+    back_button.grid(row=0, column=0, sticky="w")
+
+    header = HeaderLabel(head, text="Aufgaben")
+    header.grid(row=0, column=1, sticky="w", padx=(50, 0))
+
+    # Buttons
+    controls = ModernCard(frame)
+    controls.columnconfigure(0, weight=1)
+    controls.columnconfigure(1, weight=1)
+    controls.columnconfigure(2, weight=1)
+    controls.grid(row=1, column=0, sticky="ew", pady=(0, 12))
+
+    # List
+    task_list = ModernCard(frame)
+    task_list.grid(row=2, column=0, sticky="nsew")
+    task_list.columnconfigure(0, weight=1)
+    task_list.rowconfigure(0, weight=1)
+
+    def refresh_tasks(data_to_show=None):
+        task_treeview.tree.delete(*task_treeview.tree.get_children())
+        display_list = data_to_show if data_to_show is not None else read(file_path)
+
+        for task in display_list:
+            task_treeview.insert(
+                "",
+                "end",
+                values=(
+                    task.get("task_id", ""),
+                    task.get("name", ""),
+                    task.get("description", ""),
+                    task.get("priority", ""),
+                    task.get("date_due", "")
+                )
+            )
+
+    def delete_selected_task():
+        selected_name = task_treeview.get_selected_name()
+        if not selected_name:
+            return
+        delete_item("aufgabe", selected_name)
+        refresh_tasks()
+
+    def create_new_task():
+        # TODO austauschen mit raise_screen(create_task_screen)
+        pass
+
+    def assign_selected_member_to_task():
+        selected_name = task_treeview.get_selected_name()
+        if not selected_name:
+            return
+        assign("assign member", member_name=selected_name)
+
+    def unassign_selected_member_from_task():
+        selected_name = task_treeview.get_selected_name()
+        if not selected_name:
+            return
+        assign("unassign member", member_name=selected_name)
+
+    task_treeview = ModernTreeview(
+        task_list,
+        columns=("id", "name", "description", "priority", "date_due")
+    )
+    task_treeview.grid(row=0, column=0, sticky="nsew")
+
+    task_treeview.tree.heading("#0", text="")
+    task_treeview.tree.column("#0", width=0, stretch=False)
+
+    task_treeview.heading("id", text="ID")
+    task_treeview.column("id", width=60, anchor="center", stretch=False)
+
+    task_treeview.heading("name", text="Name")
+    task_treeview.column("name", width=180, anchor="w")
+
+    task_treeview.heading("description", text="Beschreibung")
+    task_treeview.column("description", width=320, anchor="w")
+
+    task_treeview.heading("priority", text="Priorität")
+    task_treeview.column("priority", width=120, anchor="center", stretch=False)
+
+    task_treeview.heading("date_due", text="Fällig")
+    task_treeview.column("date_due", width=160, anchor="center", stretch=False)
+
+    refresh_tasks()
+
+    assign_button = ModernButton(controls, text="Zuweisen", command=assign_selected_member_to_task)
+    assign_button.grid(row=0, column=0, sticky="ew", padx=(80, 7))
+
+    create_button = ModernButton(controls, text="Erstellen", command=create_new_task)
+    create_button.grid(row=0, column=1, sticky="ew", padx=7)
+
+    delete_button = ModernButton(controls, text="Löschen", command=delete_selected_task)
+    delete_button.grid(row=0, column=2, sticky="ew", padx=(7, 80))
+
+    return frame
     # nutzt Task.create_task() zum erstellen -> TODO def create_new_task() wie in project_screen
     # nutzt delete_item("aufgabe", selected_name) zum löschen -> TODO def delete_selected_task()
     # nutzt assign("assign member", member_name=selected_name)
