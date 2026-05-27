@@ -516,7 +516,159 @@ def task_screen(parent):
     # nutzt assign("unassign member", member_name=selected_name)
 
 def create_project_screen(parent):
-    pass
+    frame = ModernCard(parent)
+    frame.grid(row=0, column=0, sticky="nsew")
+    frame.columnconfigure(0, weight=1)
+    frame.rowconfigure(0, weight=0)
+    frame.rowconfigure(1, weight=1)
+
+    # Head
+    head = ModernCard(frame)
+    head.columnconfigure(0, weight=0)
+    head.columnconfigure(1, weight=1)
+    head.grid(row=0, column=0, sticky="ew", pady=(0, 12))
+
+    back_button = ModernButton(head, text="◀", font=("Segoe UI", 13, "bold"), padx=14, pady=8)
+    back_button.grid(row=0, column=0, sticky="w")
+
+    header = HeaderLabel(head, text="Projekt erstellen")
+    header.grid(row=0, column=1, sticky="w", padx=(50, 0))
+
+    # Formular
+    form_card = ModernCard(frame)
+    form_card.grid(row=1, column=0, sticky="n", padx=80, pady=20)
+    form_card.columnconfigure(0, weight=0)
+    form_card.columnconfigure(1, weight=1)
+
+    name_label = TextLabel(form_card, text="Name:")
+    name_label.grid(row=0, column=0, sticky="w", padx=(0, 12), pady=8)
+    name_entry = ModernEntry(form_card)
+    name_entry.grid(row=0, column=1, sticky="ew", pady=8)
+
+    description_label = TextLabel(form_card, text="Beschreibung:")
+    description_label.grid(row=1, column=0, sticky="w", padx=(0, 12), pady=8)
+    description_entry = ModernEntry(form_card)
+    description_entry.grid(row=1, column=1, sticky="ew", pady=8)
+
+    date_start_label = TextLabel(form_card, text="Startdatum:")
+    date_start_label.grid(row=2, column=0, sticky="w", padx=(0, 12), pady=8)
+    date_start_entry = ModernEntry(form_card)
+    date_start_entry.grid(row=2, column=1, sticky="ew", pady=8)
+
+    date_due_label = TextLabel(form_card, text="Fällig bis:")
+    date_due_label.grid(row=3, column=0, sticky="w", padx=(0, 12), pady=8)
+    date_due_entry = ModernEntry(form_card)
+    date_due_entry.grid(row=3, column=1, sticky="ew", pady=8)
+
+    priority_label = TextLabel(form_card, text="Priorität:")
+    priority_label.grid(row=4, column=0, sticky="w", padx=(0, 12), pady=8)
+
+    priority_var = StringVar()
+    priority_dropdown = ttk.Combobox(
+        form_card,
+        textvariable=priority_var,
+        state="readonly",
+        width=27,
+        values=["niedrig", "mittel", "hoch"]
+    )
+    priority_dropdown.grid(row=4, column=1, sticky="ew", pady=8)
+    priority_dropdown.current(0)
+
+    hint_label = TextLabel(form_card, text="Datumsformat: YYYY-MM-DD", muted=True)
+    hint_label.grid(row=5, column=1, sticky="w", pady=(0, 12))
+
+    button_frame = ModernCard(form_card)
+    button_frame.grid(row=6, column=0, columnspan=2, sticky="ew", pady=(12, 0))
+    button_frame.columnconfigure(0, weight=1)
+    button_frame.columnconfigure(1, weight=1)
+
+    def clear_entry(widget):
+        widget.entry.delete(0, END)
+
+    def submit_project():
+        name = name_entry.get().strip()
+        description = description_entry.get().strip()
+        date_start = date_start_entry.get().strip()
+        date_due = date_due_entry.get().strip()
+        priority_text = priority_var.get().strip()
+
+        if not name:
+            dialog_creation_error("Bitte einen Projektnamen eingeben.")
+            clear_entry(name_entry)
+            return
+
+        if Project.project_exists(name):
+            dialog_creation_error("Ein Projekt mit diesem Namen existiert bereits.")
+            clear_entry(name_entry)
+            return
+
+        if not description:
+            dialog_creation_error("Bitte eine Beschreibung eingeben.")
+            clear_entry(description_entry)
+            return
+
+        if not date_start:
+            dialog_creation_error("Bitte ein Startdatum eingeben.")
+            clear_entry(date_start_entry)
+            return
+
+        if not validate_date_format(date_start):
+            dialog_creation_error("Ungültiges Startdatum. Bitte YYYY-MM-DD nutzen.")
+            clear_entry(date_start_entry)
+            return
+
+        if not date_due:
+            dialog_creation_error("Bitte ein Fälligkeitsdatum eingeben.")
+            clear_entry(date_due_entry)
+            return
+
+        if not validate_date_format(date_due):
+            dialog_creation_error("Ungültiges Fälligkeitsdatum. Bitte YYYY-MM-DD nutzen.")
+            clear_entry(date_due_entry)
+            return
+
+        if date_start > date_due:
+            dialog_creation_error("Das Fälligkeitsdatum muss nach dem Startdatum liegen.")
+            clear_entry(date_due_entry)
+            return
+
+        priority_map = {
+            "niedrig": "1",
+            "mittel": "2",
+            "hoch": "3"
+        }
+        priority_value = priority_map.get(priority_text)
+
+        if not priority_value:
+            dialog_creation_error("Bitte eine gültige Priorität auswählen.")
+            return
+
+        if not dialog_confirm():
+            return
+
+        Project.create_project(name, description, date_start, date_due, priority_value)
+
+        clear_entry(name_entry)
+        clear_entry(description_entry)
+        clear_entry(date_start_entry)
+        clear_entry(date_due_entry)
+        priority_dropdown.current(0)
+
+    def cancel_creation():
+        clear_entry(name_entry)
+        clear_entry(description_entry)
+        clear_entry(date_start_entry)
+        clear_entry(date_due_entry)
+        priority_dropdown.current(0)
+        # TODO austauschen mit raise_screen(project_screen)
+
+    create_button = ModernButton(button_frame, text="Bestätigen", command=submit_project)
+    create_button.grid(row=0, column=0, sticky="ew", padx=(0, 8))
+
+    cancel_button = ModernButton(button_frame, text="Abbrechen", command=cancel_creation)
+    cancel_button.grid(row=0, column=1, sticky="ew", padx=(8, 0))
+
+    return frame
     # Formular um Nutzereingaben für Projekterstellung zu sammeln
     # create_new_project() am besten erst bei click von Bestätigen Button callen (Klassenfunktionen haben teils return, könnte sonst Probleme verursachen)
     # name, description, date_start (YYYY-MM-DD), date_due (YYYY-MM-DD), priority (niedrig (1), mittel (2), hoch (3)) # TODO priority in dropdown umbauen
