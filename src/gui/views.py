@@ -25,7 +25,7 @@ def create_test_screen(parent):
 
     return frm_test_screen
 
-def mainscreen(parent, project_screen=None):
+def mainscreen(parent, show_projects=None):
     frame = ModernCard(parent, padx=75, pady=75)
     frame.place(x=0, y=0, relwidth=1, relheight=1)
     
@@ -41,7 +41,7 @@ def mainscreen(parent, project_screen=None):
     header_label.grid(row=0, columnspan=2, sticky="ew", pady=(0, 40))
 
     # Erste Reihe
-    projects_button = ModernButton(frame, text="Projekte anzeigen", command=lambda: project_screen.tkraise() if project_screen else None, padx=35, pady=22, font=("Segoe UI", 12, "bold"))
+    projects_button = ModernButton(frame, text="Projekte anzeigen", command=lambda: show_projects() if show_projects else None, padx=35, pady=22, font=("Segoe UI", 12, "bold"))
     projects_button.grid(row=1, column=0, sticky="nsew", padx=(0, 36), pady=(0, 36))
 
     create_project_button = ModernButton(frame, text="Projekt erstellen", padx=35, pady=22, font=("Segoe UI", 12, "bold"))
@@ -63,7 +63,7 @@ def mainscreen(parent, project_screen=None):
 
     return frame
 
-def project_screen(parent, back_screen):
+def project_screen(parent, back_command=None):
     frame = ModernCard(parent)
     frame.grid(row=0, column=0, sticky="nsew")
     # frame.place(x=0, y=0, relwidth=1, relheight=1)
@@ -79,7 +79,7 @@ def project_screen(parent, back_screen):
     head.columnconfigure(1, weight=1)
     head.grid(row=0, column=0, sticky="ew", pady=(0, 12))
 
-    back_button = ModernButton(head, text="◀", command=lambda: raise_screen(back_screen), font=("Segoe UI", 13, "bold"), padx=14, pady=8)
+    back_button = ModernButton(head, text="◀", command=lambda: back_command() if back_command else None, font=("Segoe UI", 13, "bold"), padx=14, pady=8)
     back_button.grid(row=0, column=0, sticky="w")
 
     header = HeaderLabel(head, text="Projekte")
