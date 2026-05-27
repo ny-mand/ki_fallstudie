@@ -53,10 +53,10 @@ filemenu.add_command(label="Beenden", command=dialog_quit)
 helpmenu.add_command(label="Readme öffnen", command=open_readme)
 
 frm_mainscreen = mainscreen(root)
-frm_project_screen = project_screen(root, frm_mainscreen)
+frm_project_screen = project_screen(root)
 frm_member_screen = member_screen(root)
 
 frm_create_member_screen = create_member_screen(root)
 
 # Initial den Main-Screen zeigen
-raise_screen(frm_project_screen)
+raise_screen(frm_create_member_screen)
