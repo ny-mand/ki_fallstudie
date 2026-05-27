@@ -350,7 +350,7 @@ def member_screen(parent):
     refresh_members()
 
     assign_button = ModernButton(controls, text="Zuweisen", command=assign_selected_task_to_member)
-    assign_button.grid(row=0, column=0, sticky="ew", padx=(80, 7))
+    assign_button.grid(row=0, column=0, sticky="ew", padx=(80, 80))
 
     create_button = ModernButton(controls, text="Erstellen", command=create_new_team_member)
     create_button.grid(row=0, column=1, sticky="ew", padx=7)
