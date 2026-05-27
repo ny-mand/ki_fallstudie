@@ -356,7 +356,7 @@ def member_screen(parent):
     create_button.grid(row=0, column=1, sticky="ew", padx=7)
 
     delete_button = ModernButton(controls, text="Löschen", command=delete_selected_team_member)
-    delete_button.grid(row=0, column=2, sticky="ew", padx=(7, 80))
+    delete_button.grid(row=0, column=2, sticky="ew", padx=(80, 80))
 
     return frame
     # nutzt TeamMember.add_member() zum erstellen -> TODO def create_new_team_member() wie in project_screen
