@@ -924,6 +924,117 @@ def filter_settings_screen(parent):
     # sollten nach Möglichkeit gespeichert werden und auf die Projektliste angewendet werden, ohne eine weitere Liste zu erstellen
 
 def choose_item_screen(parent):
-    pass
+    frame = ModernCard(parent)
+    frame.grid(row=0, column=0, sticky="nsew")
+    frame.columnconfigure(0, weight=1)
+    frame.rowconfigure(1, weight=1)
+
+    file_path = Path(__file__).resolve().parent.parent.parent / "data" / "projekte.json"
+
+    selected_project_var = StringVar(value="")
+
+    # Head
+    head = ModernCard(frame)
+    head.columnconfigure(0, weight=0)
+    head.columnconfigure(1, weight=1)
+    head.grid(row=0, column=0, sticky="ew", pady=(0, 12))
+
+    back_button = ModernButton(head, text="◀", font=("Segoe UI", 13, "bold"), padx=14, pady=8)
+    back_button.grid(row=0, column=0, sticky="w")
+
+    header = HeaderLabel(head, text="Projekt auswählen")
+    header.grid(row=0, column=1, sticky="w", padx=(50, 0))
+
+    # Content
+    content = ModernCard(frame)
+    content.grid(row=1, column=0, sticky="nsew")
+    content.columnconfigure(0, weight=1)
+    content.rowconfigure(1, weight=1)
+    content.rowconfigure(2, weight=0)
+
+    info_label = TextLabel(
+        content,
+        text="Wähle das Projekt aus, in dem das Item zugewiesen oder entfernt werden soll."
+    )
+    info_label.grid(row=0, column=0, sticky="w", pady=(0, 12))
+
+    proj_treeview = ModernTreeview(
+        content,
+        columns=("id", "name", "description", "priority", "due_date")
+    )
+    proj_treeview.grid(row=1, column=0, sticky="nsew")
+
+    proj_treeview.tree.heading("#0", text="")
+    proj_treeview.tree.column("#0", width=0, stretch=False)
+
+    proj_treeview.heading("id", text="ID")
+    proj_treeview.column("id", width=60, anchor="center", stretch=False)
+
+    proj_treeview.heading("name", text="Name")
+    proj_treeview.column("name", width=180, anchor="w")
+
+    proj_treeview.heading("description", text="Beschreibung")
+    proj_treeview.column("description", width=320, anchor="w")
+
+    proj_treeview.heading("priority", text="Priorität")
+    proj_treeview.column("priority", width=120, anchor="center", stretch=False)
+
+    proj_treeview.heading("due_date", text="Fällig")
+    proj_treeview.column("due_date", width=160, anchor="center", stretch=False)
+
+    def refresh_projects():
+        proj_treeview.tree.delete(*proj_treeview.tree.get_children())
+        projects = read(file_path)
+
+        for project in projects:
+            proj_treeview.insert(
+                "",
+                "end",
+                values=(
+                    project.get("project_id", ""),
+                    project.get("name", ""),
+                    project.get("description", ""),
+                    project.get("priority", ""),
+                    project.get("date_due", "")
+                )
+            )
+
+    def on_select(event=None):
+        selected_name = proj_treeview.get_selected_name()
+        if not selected_name:
+            selected_project_var.set("")
+            selected_label.config(text="Aktuell ausgewählt: Kein Projekt")
+            return
+
+        selected_project_var.set(selected_name)
+        selected_label.config(text=f"Aktuell ausgewählt: {selected_name}")
+
+    def confirm_selection():
+        selected_name = selected_project_var.get().strip()
+        if not selected_name:
+            dialog_creation_error("Bitte zuerst ein Projekt auswählen.")
+            return
+
+        print(f"Ausgewähltes Projekt: {selected_name}")
+        # TODO hier die eigentliche Weiterverarbeitung einbauen,
+        # z. B. assign(..., project_name=selected_name, ...)
+        # oder Rückgabe / Übergabe an den aufrufenden Screen
+
+    bottom_area = ModernCard(content)
+    bottom_area.grid(row=2, column=0, sticky="ew", pady=(12, 0))
+    bottom_area.columnconfigure(0, weight=1)
+    bottom_area.columnconfigure(1, weight=0)
+
+    selected_label = TextLabel(bottom_area, text="Aktuell ausgewählt: Kein Projekt", muted=True)
+    selected_label.grid(row=0, column=0, sticky="w")
+
+    confirm_button = ModernButton(bottom_area, text="Bestätigen", command=confirm_selection)
+    confirm_button.grid(row=0, column=1, sticky="e")
+
+    proj_treeview.tree.bind("<<TreeviewSelect>>", on_select)
+
+    refresh_projects()
+
+    return frame
     # öffnet separates Fenster mit Projektliste, um auszuwählen, wo Task / Member hinzugefügt werden soll
     # ggf. auch für Teammitglied, um Tasks zuzuweisen
