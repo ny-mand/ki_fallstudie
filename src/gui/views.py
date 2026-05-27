@@ -386,13 +386,13 @@ def member_screen(parent):
     refresh_members()
 
     assign_button = ModernButton(controls, text="Zuweisen", command=assign_selected_task_to_member)
-    assign_button.grid(row=0, column=0, sticky="ew", padx=(80, 7))
+    assign_button.grid(row=0, column=0, sticky="ew", padx=(80, 80))
 
     create_button = ModernButton(controls, text="Erstellen", command=create_new_team_member)
     create_button.grid(row=0, column=1, sticky="ew", padx=7)
 
     delete_button = ModernButton(controls, text="Löschen", command=delete_selected_team_member)
-    delete_button.grid(row=0, column=2, sticky="ew", padx=(7, 80))
+    delete_button.grid(row=0, column=2, sticky="ew", padx=(80, 80))
 
     return frame
     # nutzt TeamMember.add_member() zum erstellen -> TODO def create_new_team_member() wie in project_screen
@@ -401,14 +401,274 @@ def member_screen(parent):
     # nutzt assign("unassign task", task_name=selected_name)
 
 def task_screen(parent):
-    pass
+    frame = ModernCard(parent)
+    frame.grid(row=0, column=0, sticky="nsew")
+    frame.columnconfigure(0, weight=1)
+    frame.rowconfigure(1, weight=0)
+    frame.rowconfigure(2, weight=1)
+
+    file_path = Path(__file__).resolve().parent.parent.parent / "data" / "aufgaben.json"
+
+    # Head
+    head = ModernCard(frame)
+    head.columnconfigure(0, weight=0)
+    head.columnconfigure(1, weight=1)
+    head.grid(row=0, column=0, sticky="ew", pady=(0, 12))
+
+    back_button = ModernButton(head, text="◀", font=("Segoe UI", 13, "bold"), padx=14, pady=8)
+    back_button.grid(row=0, column=0, sticky="w")
+
+    header = HeaderLabel(head, text="Aufgaben")
+    header.grid(row=0, column=1, sticky="w", padx=(50, 0))
+
+    # Buttons
+    controls = ModernCard(frame)
+    controls.columnconfigure(0, weight=1)
+    controls.columnconfigure(1, weight=1)
+    controls.columnconfigure(2, weight=1)
+    controls.grid(row=1, column=0, sticky="ew", pady=(0, 12))
+
+    # List
+    task_list = ModernCard(frame)
+    task_list.grid(row=2, column=0, sticky="nsew")
+    task_list.columnconfigure(0, weight=1)
+    task_list.rowconfigure(0, weight=1)
+
+    def refresh_tasks(data_to_show=None):
+        task_treeview.tree.delete(*task_treeview.tree.get_children())
+        display_list = data_to_show if data_to_show is not None else read(file_path)
+
+        for task in display_list:
+            task_treeview.insert(
+                "",
+                "end",
+                values=(
+                    task.get("task_id", ""),
+                    task.get("name", ""),
+                    task.get("description", ""),
+                    task.get("priority", ""),
+                    task.get("date_due", "")
+                )
+            )
+
+    def delete_selected_task():
+        selected_name = task_treeview.get_selected_name()
+        if not selected_name:
+            return
+        delete_item("aufgabe", selected_name)
+        refresh_tasks()
+
+    def create_new_task():
+        # TODO austauschen mit raise_screen(create_task_screen)
+        pass
+
+    def assign_selected_member_to_task():
+        selected_name = task_treeview.get_selected_name()
+        if not selected_name:
+            return
+        assign("assign member", member_name=selected_name)
+
+    def unassign_selected_member_from_task():
+        selected_name = task_treeview.get_selected_name()
+        if not selected_name:
+            return
+        assign("unassign member", member_name=selected_name)
+
+    task_treeview = ModernTreeview(
+        task_list,
+        columns=("id", "name", "description", "priority", "date_due")
+    )
+    task_treeview.grid(row=0, column=0, sticky="nsew")
+
+    task_treeview.tree.heading("#0", text="")
+    task_treeview.tree.column("#0", width=0, stretch=False)
+
+    task_treeview.heading("id", text="ID")
+    task_treeview.column("id", width=60, anchor="center", stretch=False)
+
+    task_treeview.heading("name", text="Name")
+    task_treeview.column("name", width=180, anchor="w")
+
+    task_treeview.heading("description", text="Beschreibung")
+    task_treeview.column("description", width=320, anchor="w")
+
+    task_treeview.heading("priority", text="Priorität")
+    task_treeview.column("priority", width=120, anchor="center", stretch=False)
+
+    task_treeview.heading("date_due", text="Fällig")
+    task_treeview.column("date_due", width=160, anchor="center", stretch=False)
+
+    refresh_tasks()
+
+    assign_button = ModernButton(controls, text="Zuweisen", command=assign_selected_member_to_task)
+    assign_button.grid(row=0, column=0, sticky="ew", padx=(80, 7))
+
+    create_button = ModernButton(controls, text="Erstellen", command=create_new_task)
+    create_button.grid(row=0, column=1, sticky="ew", padx=7)
+
+    delete_button = ModernButton(controls, text="Löschen", command=delete_selected_task)
+    delete_button.grid(row=0, column=2, sticky="ew", padx=(7, 80))
+
+    return frame
     # nutzt Task.create_task() zum erstellen -> TODO def create_new_task() wie in project_screen
     # nutzt delete_item("aufgabe", selected_name) zum löschen -> TODO def delete_selected_task()
     # nutzt assign("assign member", member_name=selected_name)
     # nutzt assign("unassign member", member_name=selected_name)
 
 def create_project_screen(parent):
-    pass
+    frame = ModernCard(parent)
+    frame.grid(row=0, column=0, sticky="nsew")
+    frame.columnconfigure(0, weight=1)
+    frame.rowconfigure(0, weight=0)
+    frame.rowconfigure(1, weight=1)
+
+    # Head
+    head = ModernCard(frame)
+    head.columnconfigure(0, weight=0)
+    head.columnconfigure(1, weight=1)
+    head.grid(row=0, column=0, sticky="ew", pady=(0, 12))
+
+    back_button = ModernButton(head, text="◀", font=("Segoe UI", 13, "bold"), padx=14, pady=8)
+    back_button.grid(row=0, column=0, sticky="w")
+
+    header = HeaderLabel(head, text="Projekt erstellen")
+    header.grid(row=0, column=1, sticky="w", padx=(50, 0))
+
+    # Formular
+    form_card = ModernCard(frame)
+    form_card.grid(row=1, column=0, sticky="n", padx=80, pady=20)
+    form_card.columnconfigure(0, weight=0)
+    form_card.columnconfigure(1, weight=1)
+
+    name_label = TextLabel(form_card, text="Name:")
+    name_label.grid(row=0, column=0, sticky="w", padx=(0, 12), pady=8)
+    name_entry = ModernEntry(form_card)
+    name_entry.grid(row=0, column=1, sticky="ew", pady=8)
+
+    description_label = TextLabel(form_card, text="Beschreibung:")
+    description_label.grid(row=1, column=0, sticky="w", padx=(0, 12), pady=8)
+    description_entry = ModernEntry(form_card)
+    description_entry.grid(row=1, column=1, sticky="ew", pady=8)
+
+    date_start_label = TextLabel(form_card, text="Startdatum:")
+    date_start_label.grid(row=2, column=0, sticky="w", padx=(0, 12), pady=8)
+    date_start_entry = ModernEntry(form_card)
+    date_start_entry.grid(row=2, column=1, sticky="ew", pady=8)
+
+    date_due_label = TextLabel(form_card, text="Fällig bis:")
+    date_due_label.grid(row=3, column=0, sticky="w", padx=(0, 12), pady=8)
+    date_due_entry = ModernEntry(form_card)
+    date_due_entry.grid(row=3, column=1, sticky="ew", pady=8)
+
+    priority_label = TextLabel(form_card, text="Priorität:")
+    priority_label.grid(row=4, column=0, sticky="w", padx=(0, 12), pady=8)
+
+    priority_var = StringVar()
+    priority_dropdown = ttk.Combobox(
+        form_card,
+        textvariable=priority_var,
+        state="readonly",
+        width=27,
+        values=["niedrig", "mittel", "hoch"]
+    )
+    priority_dropdown.grid(row=4, column=1, sticky="ew", pady=8)
+    priority_dropdown.current(0)
+
+    hint_label = TextLabel(form_card, text="Datumsformat: YYYY-MM-DD", muted=True)
+    hint_label.grid(row=5, column=1, sticky="w", pady=(0, 12))
+
+    button_frame = ModernCard(form_card)
+    button_frame.grid(row=6, column=0, columnspan=2, sticky="ew", pady=(12, 0))
+    button_frame.columnconfigure(0, weight=1)
+    button_frame.columnconfigure(1, weight=1)
+
+    def clear_entry(widget):
+        widget.entry.delete(0, END)
+
+    def submit_project():
+        name = name_entry.get().strip()
+        description = description_entry.get().strip()
+        date_start = date_start_entry.get().strip()
+        date_due = date_due_entry.get().strip()
+        priority_text = priority_var.get().strip()
+
+        if not name:
+            dialog_creation_error("Bitte einen Projektnamen eingeben.")
+            clear_entry(name_entry)
+            return
+
+        if Project.project_exists(name):
+            dialog_creation_error("Ein Projekt mit diesem Namen existiert bereits.")
+            clear_entry(name_entry)
+            return
+
+        if not description:
+            dialog_creation_error("Bitte eine Beschreibung eingeben.")
+            clear_entry(description_entry)
+            return
+
+        if not date_start:
+            dialog_creation_error("Bitte ein Startdatum eingeben.")
+            clear_entry(date_start_entry)
+            return
+
+        if not validate_date_format(date_start):
+            dialog_creation_error("Ungültiges Startdatum. Bitte YYYY-MM-DD nutzen.")
+            clear_entry(date_start_entry)
+            return
+
+        if not date_due:
+            dialog_creation_error("Bitte ein Fälligkeitsdatum eingeben.")
+            clear_entry(date_due_entry)
+            return
+
+        if not validate_date_format(date_due):
+            dialog_creation_error("Ungültiges Fälligkeitsdatum. Bitte YYYY-MM-DD nutzen.")
+            clear_entry(date_due_entry)
+            return
+
+        if date_start > date_due:
+            dialog_creation_error("Das Fälligkeitsdatum muss nach dem Startdatum liegen.")
+            clear_entry(date_due_entry)
+            return
+
+        priority_map = {
+            "niedrig": "1",
+            "mittel": "2",
+            "hoch": "3"
+        }
+        priority_value = priority_map.get(priority_text)
+
+        if not priority_value:
+            dialog_creation_error("Bitte eine gültige Priorität auswählen.")
+            return
+
+        if not dialog_confirm():
+            return
+
+        Project.create_project(name, description, date_start, date_due, priority_value)
+
+        clear_entry(name_entry)
+        clear_entry(description_entry)
+        clear_entry(date_start_entry)
+        clear_entry(date_due_entry)
+        priority_dropdown.current(0)
+
+    def cancel_creation():
+        clear_entry(name_entry)
+        clear_entry(description_entry)
+        clear_entry(date_start_entry)
+        clear_entry(date_due_entry)
+        priority_dropdown.current(0)
+        # TODO austauschen mit raise_screen(project_screen)
+
+    create_button = ModernButton(button_frame, text="Bestätigen", command=submit_project)
+    create_button.grid(row=0, column=0, sticky="ew", padx=(0, 8))
+
+    cancel_button = ModernButton(button_frame, text="Abbrechen", command=cancel_creation)
+    cancel_button.grid(row=0, column=1, sticky="ew", padx=(8, 0))
+
+    return frame
     # Formular um Nutzereingaben für Projekterstellung zu sammeln
     # create_new_project() am besten erst bei click von Bestätigen Button callen (Klassenfunktionen haben teils return, könnte sonst Probleme verursachen)
     # name, description, date_start (YYYY-MM-DD), date_due (YYYY-MM-DD), priority (niedrig (1), mittel (2), hoch (3)) # TODO priority in dropdown umbauen
@@ -521,7 +781,140 @@ def create_member_screen(parent):
     # name, job_title, active_since = YYYY-MM-DD (hat now by default)
 
 def create_task_screen(parent):
-    pass
+    frame = ModernCard(parent)
+    frame.grid(row=0, column=0, sticky="nsew")
+    frame.columnconfigure(0, weight=1)
+    frame.rowconfigure(0, weight=0)
+    frame.rowconfigure(1, weight=1)
+
+    # Head
+    head = ModernCard(frame)
+    head.columnconfigure(0, weight=0)
+    head.columnconfigure(1, weight=1)
+    head.grid(row=0, column=0, sticky="ew", pady=(0, 12))
+
+    back_button = ModernButton(head, text="◀", font=("Segoe UI", 13, "bold"), padx=14, pady=8)
+    back_button.grid(row=0, column=0, sticky="w")
+
+    header = HeaderLabel(head, text="Aufgabe erstellen")
+    header.grid(row=0, column=1, sticky="w", padx=(50, 0))
+
+    # Formular
+    form_card = ModernCard(frame)
+    form_card.grid(row=1, column=0, sticky="n", padx=80, pady=20)
+    form_card.columnconfigure(0, weight=0)
+    form_card.columnconfigure(1, weight=1)
+
+    name_label = TextLabel(form_card, text="Name:")
+    name_label.grid(row=0, column=0, sticky="w", padx=(0, 12), pady=8)
+    name_entry = ModernEntry(form_card)
+    name_entry.grid(row=0, column=1, sticky="ew", pady=8)
+
+    description_label = TextLabel(form_card, text="Beschreibung:")
+    description_label.grid(row=1, column=0, sticky="w", padx=(0, 12), pady=8)
+    description_entry = ModernEntry(form_card)
+    description_entry.grid(row=1, column=1, sticky="ew", pady=8)
+
+    priority_label = TextLabel(form_card, text="Priorität:")
+    priority_label.grid(row=2, column=0, sticky="w", padx=(0, 12), pady=8)
+
+    priority_var = StringVar()
+    priority_dropdown = ttk.Combobox(
+        form_card,
+        textvariable=priority_var,
+        state="readonly",
+        width=27,
+        values=["niedrig", "mittel", "hoch"]
+    )
+    priority_dropdown.grid(row=2, column=1, sticky="ew", pady=8)
+    priority_dropdown.current(0)
+
+    date_due_label = TextLabel(form_card, text="Fällig bis:")
+    date_due_label.grid(row=3, column=0, sticky="w", padx=(0, 12), pady=8)
+    date_due_entry = ModernEntry(form_card)
+    date_due_entry.grid(row=3, column=1, sticky="ew", pady=8)
+
+    hint_label = TextLabel(form_card, text="Datumsformat: YYYY-MM-DD", muted=True)
+    hint_label.grid(row=4, column=1, sticky="w", pady=(0, 12))
+
+    button_frame = ModernCard(form_card)
+    button_frame.grid(row=5, column=0, columnspan=2, sticky="ew", pady=(12, 0))
+    button_frame.columnconfigure(0, weight=1)
+    button_frame.columnconfigure(1, weight=1)
+
+    def clear_entry(widget):
+        widget.entry.delete(0, END)
+
+    def submit_task():
+        name = name_entry.get().strip()
+        description = description_entry.get().strip()
+        priority_text = priority_var.get().strip()
+        date_due = date_due_entry.get().strip()
+
+        if not name:
+            dialog_creation_error("Bitte einen Aufgabennamen eingeben.")
+            clear_entry(name_entry)
+            return
+
+        if Task.task_exists(name):
+            dialog_creation_error("Eine Aufgabe mit diesem Namen existiert bereits.")
+            clear_entry(name_entry)
+            return
+
+        if not description:
+            dialog_creation_error("Bitte eine Beschreibung eingeben.")
+            clear_entry(description_entry)
+            return
+
+        if not priority_text:
+            dialog_creation_error("Bitte eine Priorität auswählen.")
+            return
+
+        if not date_due:
+            dialog_creation_error("Bitte ein Fälligkeitsdatum eingeben.")
+            clear_entry(date_due_entry)
+            return
+
+        if not validate_date_format(date_due):
+            dialog_creation_error("Ungültiges Datumsformat. Bitte YYYY-MM-DD nutzen.")
+            clear_entry(date_due_entry)
+            return
+
+        priority_map = {
+            "niedrig": "1",
+            "mittel": "2",
+            "hoch": "3"
+        }
+        priority_value = priority_map.get(priority_text)
+
+        if not priority_value:
+            dialog_creation_error("Ungültige Priorität ausgewählt.")
+            return
+
+        if not dialog_confirm():
+            return
+
+        Task.create_task(name, description, priority_value, date_due)
+
+        clear_entry(name_entry)
+        clear_entry(description_entry)
+        clear_entry(date_due_entry)
+        priority_dropdown.current(0)
+
+    def cancel_creation():
+        clear_entry(name_entry)
+        clear_entry(description_entry)
+        clear_entry(date_due_entry)
+        priority_dropdown.current(0)
+        # TODO austauschen mit raise_screen(task_screen)
+
+    create_button = ModernButton(button_frame, text="Bestätigen", command=submit_task)
+    create_button.grid(row=0, column=0, sticky="ew", padx=(0, 8))
+
+    cancel_button = ModernButton(button_frame, text="Abbrechen", command=cancel_creation)
+    cancel_button.grid(row=0, column=1, sticky="ew", padx=(8, 0))
+
+    return frame
     # siehe create_project_screen()
     # name, description, priority (niedrig (1), mittel (2), hoch (3)), date_due # TODO priority in dropdown umbauen
 
@@ -531,6 +924,117 @@ def filter_settings_screen(parent):
     # sollten nach Möglichkeit gespeichert werden und auf die Projektliste angewendet werden, ohne eine weitere Liste zu erstellen
 
 def choose_item_screen(parent):
-    pass
+    frame = ModernCard(parent)
+    frame.grid(row=0, column=0, sticky="nsew")
+    frame.columnconfigure(0, weight=1)
+    frame.rowconfigure(1, weight=1)
+
+    file_path = Path(__file__).resolve().parent.parent.parent / "data" / "projekte.json"
+
+    selected_project_var = StringVar(value="")
+
+    # Head
+    head = ModernCard(frame)
+    head.columnconfigure(0, weight=0)
+    head.columnconfigure(1, weight=1)
+    head.grid(row=0, column=0, sticky="ew", pady=(0, 12))
+
+    back_button = ModernButton(head, text="◀", font=("Segoe UI", 13, "bold"), padx=14, pady=8)
+    back_button.grid(row=0, column=0, sticky="w")
+
+    header = HeaderLabel(head, text="Projekt auswählen")
+    header.grid(row=0, column=1, sticky="w", padx=(50, 0))
+
+    # Content
+    content = ModernCard(frame)
+    content.grid(row=1, column=0, sticky="nsew")
+    content.columnconfigure(0, weight=1)
+    content.rowconfigure(1, weight=1)
+    content.rowconfigure(2, weight=0)
+
+    info_label = TextLabel(
+        content,
+        text="Wähle das Projekt aus, in dem das Item zugewiesen oder entfernt werden soll."
+    )
+    info_label.grid(row=0, column=0, sticky="w", pady=(0, 12))
+
+    proj_treeview = ModernTreeview(
+        content,
+        columns=("id", "name", "description", "priority", "due_date")
+    )
+    proj_treeview.grid(row=1, column=0, sticky="nsew")
+
+    proj_treeview.tree.heading("#0", text="")
+    proj_treeview.tree.column("#0", width=0, stretch=False)
+
+    proj_treeview.heading("id", text="ID")
+    proj_treeview.column("id", width=60, anchor="center", stretch=False)
+
+    proj_treeview.heading("name", text="Name")
+    proj_treeview.column("name", width=180, anchor="w")
+
+    proj_treeview.heading("description", text="Beschreibung")
+    proj_treeview.column("description", width=320, anchor="w")
+
+    proj_treeview.heading("priority", text="Priorität")
+    proj_treeview.column("priority", width=120, anchor="center", stretch=False)
+
+    proj_treeview.heading("due_date", text="Fällig")
+    proj_treeview.column("due_date", width=160, anchor="center", stretch=False)
+
+    def refresh_projects():
+        proj_treeview.tree.delete(*proj_treeview.tree.get_children())
+        projects = read(file_path)
+
+        for project in projects:
+            proj_treeview.insert(
+                "",
+                "end",
+                values=(
+                    project.get("project_id", ""),
+                    project.get("name", ""),
+                    project.get("description", ""),
+                    project.get("priority", ""),
+                    project.get("date_due", "")
+                )
+            )
+
+    def on_select(event=None):
+        selected_name = proj_treeview.get_selected_name()
+        if not selected_name:
+            selected_project_var.set("")
+            selected_label.config(text="Aktuell ausgewählt: Kein Projekt")
+            return
+
+        selected_project_var.set(selected_name)
+        selected_label.config(text=f"Aktuell ausgewählt: {selected_name}")
+
+    def confirm_selection():
+        selected_name = selected_project_var.get().strip()
+        if not selected_name:
+            dialog_creation_error("Bitte zuerst ein Projekt auswählen.")
+            return
+
+        print(f"Ausgewähltes Projekt: {selected_name}")
+        # TODO hier die eigentliche Weiterverarbeitung einbauen,
+        # z. B. assign(..., project_name=selected_name, ...)
+        # oder Rückgabe / Übergabe an den aufrufenden Screen
+
+    bottom_area = ModernCard(content)
+    bottom_area.grid(row=2, column=0, sticky="ew", pady=(12, 0))
+    bottom_area.columnconfigure(0, weight=1)
+    bottom_area.columnconfigure(1, weight=0)
+
+    selected_label = TextLabel(bottom_area, text="Aktuell ausgewählt: Kein Projekt", muted=True)
+    selected_label.grid(row=0, column=0, sticky="w")
+
+    confirm_button = ModernButton(bottom_area, text="Bestätigen", command=confirm_selection)
+    confirm_button.grid(row=0, column=1, sticky="e")
+
+    proj_treeview.tree.bind("<<TreeviewSelect>>", on_select)
+
+    refresh_projects()
+
+    return frame
     # öffnet separates Fenster mit Projektliste, um auszuwählen, wo Task / Member hinzugefügt werden soll
     # ggf. auch für Teammitglied, um Tasks zuzuweisen
