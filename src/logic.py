@@ -47,7 +47,6 @@ def assign(choice, project_name=None, member_name=None, task_name=None):
         Project.remove_task_from_member(project_name, member_name, task_name)
 
     elif choice == "assign member":
-        project_name = get_non_empty_input("Zu welchem Projekt möchtest du Mitglieder hinzufügen? ")
         if not Project.project_exists(project_name):
             print(f"Das Projekt '{project_name}' existiert nicht.")
             return

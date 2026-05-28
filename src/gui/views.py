@@ -1,4 +1,4 @@
-from tkinter import *
+﻿from tkinter import *
 from pathlib import Path
 from src.gui.design_elements import *
 from src.dateiverwaltung import read
@@ -25,7 +25,7 @@ def create_test_screen(parent):
 
     return frm_test_screen
 
-def mainscreen(parent, show_projects=None):
+def mainscreen(parent, show_projects=None, show_members=None, show_tasks=None, show_create_project=None, show_create_member=None, show_create_task=None):
     frame = ModernCard(parent, padx=75, pady=75)
     frame.place(x=0, y=0, relwidth=1, relheight=1)
     
@@ -44,26 +44,26 @@ def mainscreen(parent, show_projects=None):
     projects_button = ModernButton(frame, text="Projekte anzeigen", command=lambda: show_projects() if show_projects else None, padx=35, pady=22, font=("Segoe UI", 12, "bold"))
     projects_button.grid(row=1, column=0, sticky="nsew", padx=(0, 36), pady=(0, 36))
 
-    create_project_button = ModernButton(frame, text="Projekt erstellen", padx=35, pady=22, font=("Segoe UI", 12, "bold"))
+    create_project_button = ModernButton(frame, text="Projekt erstellen", command=lambda: show_create_project() if show_create_project else None, padx=35, pady=22, font=("Segoe UI", 12, "bold"))
     create_project_button.grid(row=1, column=1, sticky="nsew", padx=(36, 0), pady=(0, 36))
 
     # Zweite Reihe
-    member_button = ModernButton(frame, text="Member anzeigen", padx=35, pady=22, font=("Segoe UI", 12, "bold"))
+    member_button = ModernButton(frame, text="Member anzeigen", command=lambda: show_members() if show_members else None, padx=35, pady=22, font=("Segoe UI", 12, "bold"))
     member_button.grid(row=2, column=0, sticky="nsew", padx=(0, 36), pady=(0, 36))
 
-    add_member_button = ModernButton(frame, text="Member hinzufügen", padx=35, pady=22, font=("Segoe UI", 12, "bold"))
+    add_member_button = ModernButton(frame, text="Member hinzufügen", command=lambda: show_create_member() if show_create_member else None, padx=35, pady=22, font=("Segoe UI", 12, "bold"))
     add_member_button.grid(row=2, column=1, sticky="nsew", padx=(36, 0), pady=(0, 36))
 
     # Dritte Reihe
-    tasks_button = ModernButton(frame, text="Aufgaben anzeigen", padx=35, pady=22, font=("Segoe UI", 12, "bold"))
+    tasks_button = ModernButton(frame, text="Aufgaben anzeigen", command=lambda: show_tasks() if show_tasks else None, padx=35, pady=22, font=("Segoe UI", 12, "bold"))
     tasks_button.grid(row=3, column=0, sticky="nsew", padx=(0, 36), pady=0)
 
-    add_task_button = ModernButton(frame, text="Aufgabe hinzufügen", padx=35, pady=22, font=("Segoe UI", 12, "bold"))
+    add_task_button = ModernButton(frame, text="Aufgabe hinzufügen", command=lambda: show_create_task() if show_create_task else None, padx=35, pady=22, font=("Segoe UI", 12, "bold"))
     add_task_button.grid(row=3, column=1, sticky="nsew", padx=(36, 0), pady=0)
 
     return frame
 
-def project_screen(parent, back_command=None):
+def project_screen(parent, back_command=None, create_command=None):
     frame = ModernCard(parent)
     frame.grid(row=0, column=0, sticky="nsew")
     # frame.place(x=0, y=0, relwidth=1, relheight=1)
@@ -119,16 +119,7 @@ def project_screen(parent, back_command=None):
                 )
             )
 
-    def delete_selected_project():
-        selected_name = proj_treeview.get_selected_name()
-        if not selected_name:
-            return
-        delete_item("projekt", selected_name)
-        refresh_projects()
-
-    def create_new_project():
-        Project.create_project()
-        refresh_projects()
+    frame.refresh_projects = refresh_projects
 
     def delete_selected_project():
         selected_name = proj_treeview.get_selected_name()
@@ -137,8 +128,11 @@ def project_screen(parent, back_command=None):
         delete_item("projekt", selected_name)
         refresh_projects()
 
-    def create_new_project():
-        Project.create_project() #TODO austauschen mit raise_screen(create_project_screen)
+    def delete_selected_project():
+        selected_name = proj_treeview.get_selected_name()
+        if not selected_name:
+            return
+        delete_item("projekt", selected_name)
         refresh_projects()
 
     def open_filter_window():
@@ -274,7 +268,7 @@ def project_screen(parent, back_command=None):
     filter = ModernButton(controls, text="Filtern", command=open_filter_window)
     filter.grid(row=0, column=0, sticky="ew", padx=(80, 80))
 
-    create = ModernButton(controls, text="Erstellen", command=create_new_project)
+    create = ModernButton(controls, text="Erstellen", command=lambda: create_command() if create_command else None)
     create.grid(row=0, column=1, sticky="ew", padx=7)
 
     delete = ModernButton(
@@ -289,7 +283,7 @@ def project_screen(parent, back_command=None):
 
 
 
-def member_screen(parent):
+def member_screen(parent, back_command=None, create_command=None, assign_command=None):
     frame = ModernCard(parent)
     frame.grid(row=0, column=0, sticky="nsew")
     frame.columnconfigure(0, weight=1)
@@ -304,7 +298,7 @@ def member_screen(parent):
     head.columnconfigure(1, weight=1)
     head.grid(row=0, column=0, sticky="ew", pady=(0, 12))
 
-    back_button = ModernButton(head, text="◀", font=("Segoe UI", 13, "bold"), padx=14, pady=8)
+    back_button = ModernButton(head, text="◀", command=lambda: back_command() if back_command else None, font=("Segoe UI", 13, "bold"), padx=14, pady=8)
     back_button.grid(row=0, column=0, sticky="w")
 
     header = HeaderLabel(head, text="Teammitglieder")
@@ -339,6 +333,8 @@ def member_screen(parent):
                 )
             )
 
+    frame.refresh_members = refresh_members
+
     def delete_selected_team_member():
         selected_name = member_treeview.get_selected_name()
         if not selected_name:
@@ -346,15 +342,13 @@ def member_screen(parent):
         delete_item("teammitglied", selected_name)
         refresh_members()
 
-    def create_new_team_member():
-        # TODO austauschen mit raise_screen(create_member_screen)
-        pass
-
-    def assign_selected_task_to_member():
+    def assign_selected_member_to_project():
         selected_name = member_treeview.get_selected_name()
         if not selected_name:
+            dialog_creation_error("Bitte zuerst ein Teammitglied auswählen.")
             return
-        assign("assign task", task_name=selected_name)
+        if assign_command:
+            assign_command(selected_name)
 
     def unassign_selected_task_from_member():
         selected_name = member_treeview.get_selected_name()
@@ -385,10 +379,10 @@ def member_screen(parent):
 
     refresh_members()
 
-    assign_button = ModernButton(controls, text="Zuweisen", command=assign_selected_task_to_member)
+    assign_button = ModernButton(controls, text="Zuweisen", command=assign_selected_member_to_project)
     assign_button.grid(row=0, column=0, sticky="ew", padx=(80, 80))
 
-    create_button = ModernButton(controls, text="Erstellen", command=create_new_team_member)
+    create_button = ModernButton(controls, text="Erstellen", command=lambda: create_command() if create_command else None)
     create_button.grid(row=0, column=1, sticky="ew", padx=7)
 
     delete_button = ModernButton(controls, text="Löschen", command=delete_selected_team_member)
@@ -400,7 +394,7 @@ def member_screen(parent):
     # nutzt assign("assign task", task_name=selected_name)
     # nutzt assign("unassign task", task_name=selected_name)
 
-def task_screen(parent):
+def task_screen(parent, back_command=None, create_command=None, assign_command=None):
     frame = ModernCard(parent)
     frame.grid(row=0, column=0, sticky="nsew")
     frame.columnconfigure(0, weight=1)
@@ -415,7 +409,7 @@ def task_screen(parent):
     head.columnconfigure(1, weight=1)
     head.grid(row=0, column=0, sticky="ew", pady=(0, 12))
 
-    back_button = ModernButton(head, text="◀", font=("Segoe UI", 13, "bold"), padx=14, pady=8)
+    back_button = ModernButton(head, text="◀", command=lambda: back_command() if back_command else None, font=("Segoe UI", 13, "bold"), padx=14, pady=8)
     back_button.grid(row=0, column=0, sticky="w")
 
     header = HeaderLabel(head, text="Aufgaben")
@@ -451,6 +445,8 @@ def task_screen(parent):
                 )
             )
 
+    frame.refresh_tasks = refresh_tasks
+
     def delete_selected_task():
         selected_name = task_treeview.get_selected_name()
         if not selected_name:
@@ -458,15 +454,13 @@ def task_screen(parent):
         delete_item("aufgabe", selected_name)
         refresh_tasks()
 
-    def create_new_task():
-        # TODO austauschen mit raise_screen(create_task_screen)
-        pass
-
-    def assign_selected_member_to_task():
+    def assign_selected_task_to_member():
         selected_name = task_treeview.get_selected_name()
         if not selected_name:
+            dialog_creation_error("Bitte zuerst eine Aufgabe auswählen.")
             return
-        assign("assign member", member_name=selected_name)
+        if assign_command:
+            assign_command(selected_name)
 
     def unassign_selected_member_from_task():
         selected_name = task_treeview.get_selected_name()
@@ -500,10 +494,10 @@ def task_screen(parent):
 
     refresh_tasks()
 
-    assign_button = ModernButton(controls, text="Zuweisen", command=assign_selected_member_to_task)
+    assign_button = ModernButton(controls, text="Zuweisen", command=assign_selected_task_to_member)
     assign_button.grid(row=0, column=0, sticky="ew", padx=(80, 7))
 
-    create_button = ModernButton(controls, text="Erstellen", command=create_new_task)
+    create_button = ModernButton(controls, text="Erstellen", command=lambda: create_command() if create_command else None)
     create_button.grid(row=0, column=1, sticky="ew", padx=7)
 
     delete_button = ModernButton(controls, text="Löschen", command=delete_selected_task)
@@ -515,7 +509,7 @@ def task_screen(parent):
     # nutzt assign("assign member", member_name=selected_name)
     # nutzt assign("unassign member", member_name=selected_name)
 
-def create_project_screen(parent):
+def create_project_screen(parent, back_command=None):
     frame = ModernCard(parent)
     frame.grid(row=0, column=0, sticky="nsew")
     frame.columnconfigure(0, weight=1)
@@ -528,7 +522,7 @@ def create_project_screen(parent):
     head.columnconfigure(1, weight=1)
     head.grid(row=0, column=0, sticky="ew", pady=(0, 12))
 
-    back_button = ModernButton(head, text="◀", font=("Segoe UI", 13, "bold"), padx=14, pady=8)
+    back_button = ModernButton(head, text="◀", command=lambda: back_command() if back_command else None, font=("Segoe UI", 13, "bold"), padx=14, pady=8)
     back_button.grid(row=0, column=0, sticky="w")
 
     header = HeaderLabel(head, text="Projekt erstellen")
@@ -660,7 +654,8 @@ def create_project_screen(parent):
         clear_entry(date_start_entry)
         clear_entry(date_due_entry)
         priority_dropdown.current(0)
-        # TODO austauschen mit raise_screen(project_screen)
+        if back_command:
+            back_command()
 
     create_button = ModernButton(button_frame, text="Bestätigen", command=submit_project)
     create_button.grid(row=0, column=0, sticky="ew", padx=(0, 8))
@@ -674,7 +669,7 @@ def create_project_screen(parent):
     # name, description, date_start (YYYY-MM-DD), date_due (YYYY-MM-DD), priority (niedrig (1), mittel (2), hoch (3)) # TODO priority in dropdown umbauen
     # erwartetes Verhalten: Formular ausfüllen, bestätigen / abbrechen Button, bei Fehleingabe dialog mit entsprechendem Fehler (per argument übergeben), nur fehlerhaftes Feld wird geleert, Rest bleibt bestehen bis Erstellen erfolgreich
 
-def create_member_screen(parent):
+def create_member_screen(parent, back_command=None):
     frame = ModernCard(parent)
     frame.grid(row=0, column=0, sticky="nsew")
     frame.columnconfigure(0, weight=1)
@@ -687,7 +682,7 @@ def create_member_screen(parent):
     head.columnconfigure(1, weight=1)
     head.grid(row=0, column=0, sticky="ew", pady=(0, 12))
 
-    back_button = ModernButton(head, text="◀", font=("Segoe UI", 13, "bold"), padx=14, pady=8)
+    back_button = ModernButton(head, text="◀", command=lambda: back_command() if back_command else None, font=("Segoe UI", 13, "bold"), padx=14, pady=8)
     back_button.grid(row=0, column=0, sticky="w")
 
     header = HeaderLabel(head, text="Teammitglied erstellen")
@@ -768,7 +763,8 @@ def create_member_screen(parent):
         clear_entry(name_entry)
         clear_entry(job_title_entry)
         clear_entry(active_since_entry)
-        # TODO austauschen mit raise_screen(member_screen)
+        if back_command:
+            back_command()
 
     create_button = ModernButton(button_frame, text="Bestätigen", command=submit_member)
     create_button.grid(row=0, column=0, sticky="ew", padx=(0, 8))
@@ -780,7 +776,7 @@ def create_member_screen(parent):
     # siehe create_project_screen()
     # name, job_title, active_since = YYYY-MM-DD (hat now by default)
 
-def create_task_screen(parent):
+def create_task_screen(parent, back_command=None):
     frame = ModernCard(parent)
     frame.grid(row=0, column=0, sticky="nsew")
     frame.columnconfigure(0, weight=1)
@@ -793,7 +789,7 @@ def create_task_screen(parent):
     head.columnconfigure(1, weight=1)
     head.grid(row=0, column=0, sticky="ew", pady=(0, 12))
 
-    back_button = ModernButton(head, text="◀", font=("Segoe UI", 13, "bold"), padx=14, pady=8)
+    back_button = ModernButton(head, text="◀", command=lambda: back_command() if back_command else None, font=("Segoe UI", 13, "bold"), padx=14, pady=8)
     back_button.grid(row=0, column=0, sticky="w")
 
     header = HeaderLabel(head, text="Aufgabe erstellen")
@@ -906,7 +902,8 @@ def create_task_screen(parent):
         clear_entry(description_entry)
         clear_entry(date_due_entry)
         priority_dropdown.current(0)
-        # TODO austauschen mit raise_screen(task_screen)
+        if back_command:
+            back_command()
 
     create_button = ModernButton(button_frame, text="Bestätigen", command=submit_task)
     create_button.grid(row=0, column=0, sticky="ew", padx=(0, 8))
@@ -923,7 +920,97 @@ def filter_settings_screen(parent):
     # öffnet separates Fenster um Filtereinstellungen anzupassen
     # sollten nach Möglichkeit gespeichert werden und auf die Projektliste angewendet werden, ohne eine weitere Liste zu erstellen
 
-def choose_item_screen(parent):
+
+def resolve_project_for_member(member_name):
+    projects_path = Path(__file__).resolve().parent.parent.parent / "data" / "projekte.json"
+    projects = read(projects_path)
+    matching_projects = []
+
+    for project in projects:
+        working_by_person = project.get("working_by_person", {})
+        if member_name in working_by_person:
+            matching_projects.append(project.get("name", ""))
+
+    if len(matching_projects) == 1:
+        return matching_projects[0]
+
+    return None
+
+
+def create_member_assignment_starter(
+    choose_project_screen_frame,
+    show_screen,
+    assign_func,
+    refresh_members,
+    refresh_projects,
+):
+    def start_member_assignment(member_name):
+        member_name = member_name.strip()
+        if not member_name:
+            dialog_creation_error("Bitte zuerst ein Teammitglied auswählen.")
+            return
+
+        def confirm_project(project_name):
+            project_name = project_name.strip()
+            if not project_name:
+                dialog_creation_error("Bitte zuerst ein Projekt auswählen.")
+                return
+
+            assign_func("assign member", project_name=project_name, member_name=member_name)
+            refresh_members()
+            refresh_projects()
+            show_screen("member")
+
+        choose_project_screen_frame.set_confirm_command(confirm_project)
+        show_screen("choose_project_member")
+
+    return start_member_assignment
+
+
+def create_task_assignment_starter(
+    choose_member_screen_frame,
+    show_screen,
+    assign_func,
+    refresh_tasks,
+    refresh_members,
+    refresh_projects,
+):
+    def start_task_assignment(task_name):
+        task_name = task_name.strip()
+        if not task_name:
+            dialog_creation_error("Bitte zuerst eine Aufgabe auswählen.")
+            return
+
+        def confirm_member(member_name):
+            member_name = member_name.strip()
+            if not member_name:
+                dialog_creation_error("Bitte zuerst ein Teammitglied auswählen.")
+                return
+
+            project_name = resolve_project_for_member(member_name)
+            if not project_name:
+                dialog_creation_error(
+                    "Das Teammitglied ist keinem eindeutigen Projekt zugeordnet. Bitte Mitglied zuerst genau einem Projekt zuweisen."
+                )
+                return
+
+            assign_func(
+                "assign task",
+                project_name=project_name,
+                member_name=member_name,
+                task_name=task_name,
+            )
+            refresh_tasks()
+            refresh_members()
+            refresh_projects()
+            show_screen("task")
+
+        choose_member_screen_frame.set_confirm_command(confirm_member)
+        show_screen("choose_member_task")
+
+    return start_task_assignment
+
+def choose_project_screen(parent, back_command=None, confirm_command=None):
     frame = ModernCard(parent)
     frame.grid(row=0, column=0, sticky="nsew")
     frame.columnconfigure(0, weight=1)
@@ -939,7 +1026,12 @@ def choose_item_screen(parent):
     head.columnconfigure(1, weight=1)
     head.grid(row=0, column=0, sticky="ew", pady=(0, 12))
 
-    back_button = ModernButton(head, text="◀", font=("Segoe UI", 13, "bold"), padx=14, pady=8)
+    callbacks = {
+        "back": back_command,
+        "confirm": confirm_command,
+    }
+
+    back_button = ModernButton(head, text="◀", command=lambda: callbacks["back"]() if callbacks["back"] else None, font=("Segoe UI", 13, "bold"), padx=14, pady=8)
     back_button.grid(row=0, column=0, sticky="w")
 
     header = HeaderLabel(head, text="Projekt auswählen")
@@ -1015,10 +1107,8 @@ def choose_item_screen(parent):
             dialog_creation_error("Bitte zuerst ein Projekt auswählen.")
             return
 
-        print(f"Ausgewähltes Projekt: {selected_name}")
-        # TODO hier die eigentliche Weiterverarbeitung einbauen,
-        # z. B. assign(..., project_name=selected_name, ...)
-        # oder Rückgabe / Übergabe an den aufrufenden Screen
+        if callbacks["confirm"]:
+            callbacks["confirm"](selected_name)
 
     bottom_area = ModernCard(content)
     bottom_area.grid(row=2, column=0, sticky="ew", pady=(12, 0))
@@ -1035,6 +1125,129 @@ def choose_item_screen(parent):
 
     refresh_projects()
 
+    frame.set_confirm_command = lambda command: callbacks.__setitem__("confirm", command)
+    frame.set_back_command = lambda command: callbacks.__setitem__("back", command)
+
     return frame
     # öffnet separates Fenster mit Projektliste, um auszuwählen, wo Task / Member hinzugefügt werden soll
     # ggf. auch für Teammitglied, um Tasks zuzuweisen
+
+def choose_member_screen(parent, back_command=None, confirm_command=None):
+    frame = ModernCard(parent)
+    frame.grid(row=0, column=0, sticky="nsew")
+    frame.columnconfigure(0, weight=1)
+    frame.rowconfigure(1, weight=1)
+
+    file_path = Path(__file__).resolve().parent.parent.parent / "data" / "teammitglieder.json"
+
+    selected_member_var = StringVar(value="")
+
+    # Head
+    head = ModernCard(frame)
+    head.columnconfigure(0, weight=0)
+    head.columnconfigure(1, weight=1)
+    head.grid(row=0, column=0, sticky="ew", pady=(0, 12))
+
+    callbacks = {
+        "back": back_command,
+        "confirm": confirm_command,
+    }
+
+    back_button = ModernButton(head, text="◀", command=lambda: callbacks["back"]() if callbacks["back"] else None, font=("Segoe UI", 13, "bold"), padx=14, pady=8)
+    back_button.grid(row=0, column=0, sticky="w")
+
+    header = HeaderLabel(head, text="Teammitglied auswählen")
+    header.grid(row=0, column=1, sticky="w", padx=(50, 0))
+
+    # Content
+    content = ModernCard(frame)
+    content.grid(row=1, column=0, sticky="nsew")
+    content.columnconfigure(0, weight=1)
+    content.rowconfigure(1, weight=1)
+    content.rowconfigure(2, weight=0)
+
+    info_label = TextLabel(
+        content,
+        text="Wähle das Teammitglied aus, dem die Aufgabe zugewiesen werden soll."
+    )
+    info_label.grid(row=0, column=0, sticky="w", pady=(0, 12))
+
+    member_treeview = ModernTreeview(
+        content,
+        columns=("id", "name", "job_title", "active_since")
+    )
+    member_treeview.grid(row=1, column=0, sticky="nsew")
+
+    member_treeview.tree.heading("#0", text="")
+    member_treeview.tree.column("#0", width=0, stretch=False)
+
+    member_treeview.heading("id", text="ID")
+    member_treeview.column("id", width=60, anchor="center", stretch=False)
+
+    member_treeview.heading("name", text="Name")
+    member_treeview.column("name", width=180, anchor="w")
+
+    member_treeview.heading("job_title", text="Jobtitel")
+    member_treeview.column("job_title", width=220, anchor="w")
+
+    member_treeview.heading("active_since", text="Aktiv seit")
+    member_treeview.column("active_since", width=160, anchor="center", stretch=False)
+
+    def refresh_members():
+        member_treeview.tree.delete(*member_treeview.tree.get_children())
+        members = read(file_path)
+
+        for member in members:
+            member_treeview.insert(
+                "",
+                "end",
+                values=(
+                    member.get("member_id", ""),
+                    member.get("name", ""),
+                    member.get("job_title", ""),
+                    member.get("active_since", "")
+                )
+            )
+
+    def on_select(event=None):
+        selected_name = member_treeview.get_selected_name()
+        if not selected_name:
+            selected_member_var.set("")
+            selected_label.config(text="Aktuell ausgewählt: Kein Teammitglied")
+            return
+
+        selected_member_var.set(selected_name)
+        selected_label.config(text=f"Aktuell ausgewählt: {selected_name}")
+
+    def confirm_selection():
+        selected_name = selected_member_var.get().strip()
+        if not selected_name:
+            dialog_creation_error("Bitte zuerst ein Teammitglied auswählen.")
+            return
+
+        if callbacks["confirm"]:
+            callbacks["confirm"](selected_name)
+
+    bottom_area = ModernCard(content)
+    bottom_area.grid(row=2, column=0, sticky="ew", pady=(12, 0))
+    bottom_area.columnconfigure(0, weight=1)
+    bottom_area.columnconfigure(1, weight=0)
+
+    selected_label = TextLabel(bottom_area, text="Aktuell ausgewählt: Kein Teammitglied", muted=True)
+    selected_label.grid(row=0, column=0, sticky="w")
+
+    confirm_button = ModernButton(bottom_area, text="Bestätigen", command=confirm_selection)
+    confirm_button.grid(row=0, column=1, sticky="e")
+
+    member_treeview.tree.bind("<<TreeviewSelect>>", on_select)
+
+    refresh_members()
+
+    frame.set_confirm_command = lambda command: callbacks.__setitem__("confirm", command)
+    frame.set_back_command = lambda command: callbacks.__setitem__("back", command)
+
+    return frame
+
+
+def choose_item_screen(parent, back_command=None):
+    return choose_project_screen(parent, back_command=back_command)
