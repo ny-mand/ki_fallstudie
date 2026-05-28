@@ -5,8 +5,7 @@ from src.dateiverwaltung import read
 from src.logic import *
 from src.projekt import Project
 from tkinter import ttk  # Wird für Treeview und das Dropdown-Menü (Combobox) benötigt
-from src.dateiverwaltung import read
-from src.utils import validate_date_format, format_to_german_date
+from src.utils import validate_date_format
 
 def create_test_screen(parent):
     """Erstellt den Test-Screen Frame"""
@@ -122,13 +121,6 @@ def project_screen(parent, back_command=None, create_command=None):
             )
 
     frame.refresh_projects = refresh_projects
-
-    def delete_selected_project():
-        selected_name = proj_treeview.get_selected_name()
-        if not selected_name:
-            return
-        delete_item("projekt", selected_name)
-        refresh_projects()
 
     def delete_selected_project():
         selected_name = proj_treeview.get_selected_name()
@@ -266,8 +258,8 @@ def project_screen(parent, back_command=None, create_command=None):
             )
         )
 
-    filter = ModernButton(controls, text="Filtern", command=open_filter_window)
-    filter.grid(row=0, column=0, sticky="ew", padx=12)
+    filter_btn = ModernButton(controls, text="Filtern", command=open_filter_window)
+    filter_btn.grid(row=0, column=0, sticky="ew", padx=12)
 
     create = ModernButton(controls, text="Erstellen", command=lambda: create_command() if create_command else None)
     create.grid(row=0, column=1, sticky="ew", padx=12)
