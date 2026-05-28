@@ -126,7 +126,7 @@ class ModernCard(Frame):
             padx=padx, 
             pady=pady, 
             highlightbackground=COLORS["border"],
-            highlightthickness=1,
+            highlightthickness=0,
             **kwargs
         )
 
@@ -164,7 +164,7 @@ class ModernListbox(Listbox):
             fg=COLORS["text"],
             font=FONT_MAIN,
             borderwidth=0,
-            highlightthickness=1,
+            highlightthickness=0,
             highlightbackground=COLORS["border"],
             highlightcolor=COLORS["accent"], # Farbe des Rahmens bei Fokus
             selectbackground=COLORS["accent"],
