@@ -4,8 +4,6 @@ from unittest.mock import patch
 from src.teammitglied import TeamMember
 
 
-# 1. Testdaten vorbereiten (Fixture)
-# Das stellt sicher, dass jeder Test saubere Daten bekommt
 @pytest.fixture
 def mock_member_data():
     return [
@@ -24,68 +22,50 @@ def mock_member_data():
     ]
 
 
-# 2. Test für member_exists
-# Wir mocken 'read', damit keine echte Datei geöffnet wird
-@patch('src.teammitglied.read')
+@patch("src.teammitglied.read")
 def test_member_exists(mock_read, mock_member_data):
     mock_read.return_value = mock_member_data
 
-    # Positiv-Tests
     assert TeamMember.member_exists("Alice") is True
-    assert TeamMember.member_exists("alice") is True  # Case-insensitive
-
-    # Negativ-Test
+    assert TeamMember.member_exists("alice") is True
     assert TeamMember.member_exists("Charlie") is False
 
 
-# 3. Test für add_member (Erfolgsfall)
-@patch('src.teammitglied.write')
-@patch('src.teammitglied.read')
-@patch('src.teammitglied.get_non_empty_input')
-@patch('src.teammitglied.validate_date_format')
-@patch('builtins.input')
-def test_add_member_success(mock_input, mock_validate, mock_get_input, mock_read, mock_write, mock_member_data):
-    # Mock-Setup
+@patch("src.teammitglied.write")
+@patch("src.teammitglied.read")
+@patch("src.teammitglied.validate_date_format")
+def test_add_member_success(mock_validate, mock_read, mock_write, mock_member_data):
     mock_read.return_value = mock_member_data
     mock_validate.return_value = True
 
-    # Eingaben simulieren:
-    # 1. Name: "Charlie"
-    # 2. Job: "Tester"
-    mock_get_input.side_effect = ["Charlie", "Tester"]
+    TeamMember.add_member("Charlie", "Tester", "2023-01-01")
 
-    # Datumseingabe (optional): "2023-01-01"
-    mock_input.return_value = "2023-01-01"
-
-    # Funktion ausführen
-    TeamMember.add_member()
-
-    # Prüfungen (Assertions)
-    mock_write.assert_called_once()  # Wurde gespeichert?
-
-    # Was wurde genau gespeichert?
+    mock_write.assert_called_once()
     saved_data = mock_write.call_args[0][1]
     new_member = saved_data[-1]
 
-    assert new_member['name'] == "Charlie"
-    assert new_member['job_title'] == "Tester"
-    assert new_member['member_id'] == 3  # Automatische ID-Erhöhung (2+1)
-    assert new_member['active_since'] == "2023-01-01"
+    assert new_member["name"] == "Charlie"
+    assert new_member["job_title"] == "Tester"
+    assert new_member["member_id"] == 3
+    assert new_member["active_since"] == "2023-01-01"
 
 
-# 4. Test für add_member (Duplikat-Fall)
-@patch('src.teammitglied.write')
-@patch('src.teammitglied.read')
-@patch('src.teammitglied.get_non_empty_input')
-def test_add_member_duplicate(mock_get_input, mock_read, mock_write, mock_member_data):
+@patch("src.teammitglied.write")
+@patch("src.teammitglied.read")
+def test_add_member_duplicate(mock_read, mock_write, mock_member_data):
     mock_read.return_value = mock_member_data
 
-    # Benutzer gibt einen Namen ein, den es schon gibt ("Alice")
-    mock_get_input.return_value = "Alice"
-
-    TeamMember.add_member()
+    TeamMember.add_member("Alice", "Architect", "2024-01-01")
 
     mock_write.assert_not_called()
+
+
+def test_teammember_constructor():
+    member = TeamMember("Mila", "QA", "2024-05-01")
+
+    assert member.name == "Mila"
+    assert member.job_title == "QA"
+    assert member.active_since == "2024-05-01"
 
 
 
