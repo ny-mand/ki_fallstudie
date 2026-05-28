@@ -26,40 +26,43 @@ def create_test_screen(parent):
     return frm_test_screen
 
 def mainscreen(parent, show_projects=None, show_members=None, show_tasks=None, show_create_project=None, show_create_member=None, show_create_task=None):
-    frame = ModernCard(parent, padx=75, pady=75)
+    GAP = 80  # Abstand zwischen und um die Buttons — anpassen wie gewünscht
+
+    frame = ModernCard(parent, padx=GAP, pady=GAP)  # Außenabstand = GAP
     frame.place(x=0, y=0, relwidth=1, relheight=1)
-    
-    # Konfiguriere die Spalten und Zeilen
+
     frame.columnconfigure(0, weight=1)
     frame.columnconfigure(1, weight=1)
-    frame.rowconfigure(0, weight=0)  # Header - feste Größe
-    frame.rowconfigure(1, weight=1)  # Button-Zeile 1
-    frame.rowconfigure(2, weight=1)  # Button-Zeile 2
-    frame.rowconfigure(3, weight=1)  # Button-Zeile 3
+    frame.rowconfigure(0, weight=0)
+    frame.rowconfigure(1, weight=1)
+    frame.rowconfigure(2, weight=1)
+    frame.rowconfigure(3, weight=1)
 
     header_label = HeaderLabel(frame, text="Projektmanagement - Hauptmenü")
-    header_label.grid(row=0, columnspan=2, sticky="ew", pady=(0, 40))
+    header_label.grid(row=0, columnspan=2, sticky="ew", pady=(0, GAP))
+
+    HALF = GAP // 2  # Halber Abstand für die Mitte zwischen den Buttons
 
     # Erste Reihe
-    projects_button = ModernButton(frame, text="Projekte anzeigen", command=lambda: show_projects() if show_projects else None, padx=35, pady=22, font=("Segoe UI", 12, "bold"))
-    projects_button.grid(row=1, column=0, sticky="nsew", padx=(0, 36), pady=(0, 36))
+    projects_button = ModernButton(frame, text="Projekte anzeigen", command=lambda: show_projects() if show_projects else None, padx=20, pady=12, font=("Segoe UI", 14, "bold"))
+    projects_button.grid(row=1, column=0, sticky="nsew", padx=(0, HALF), pady=(0, GAP))
 
-    create_project_button = ModernButton(frame, text="Projekt erstellen", command=lambda: show_create_project() if show_create_project else None, padx=35, pady=22, font=("Segoe UI", 12, "bold"))
-    create_project_button.grid(row=1, column=1, sticky="nsew", padx=(36, 0), pady=(0, 36))
+    create_project_button = ModernButton(frame, text="Projekt erstellen", command=lambda: show_create_project() if show_create_project else None, padx=20, pady=12, font=("Segoe UI", 14, "bold"))
+    create_project_button.grid(row=1, column=1, sticky="nsew", padx=(HALF, 0), pady=(0, GAP))
 
     # Zweite Reihe
-    member_button = ModernButton(frame, text="Member anzeigen", command=lambda: show_members() if show_members else None, padx=35, pady=22, font=("Segoe UI", 12, "bold"))
-    member_button.grid(row=2, column=0, sticky="nsew", padx=(0, 36), pady=(0, 36))
+    member_button = ModernButton(frame, text="Member anzeigen", command=lambda: show_members() if show_members else None, padx=20, pady=12, font=("Segoe UI", 14, "bold"))
+    member_button.grid(row=2, column=0, sticky="nsew", padx=(0, HALF), pady=(0, GAP))
 
-    add_member_button = ModernButton(frame, text="Member hinzufügen", command=lambda: show_create_member() if show_create_member else None, padx=35, pady=22, font=("Segoe UI", 12, "bold"))
-    add_member_button.grid(row=2, column=1, sticky="nsew", padx=(36, 0), pady=(0, 36))
+    add_member_button = ModernButton(frame, text="Member hinzufügen", command=lambda: show_create_member() if show_create_member else None, padx=20, pady=12, font=("Segoe UI", 14, "bold"))
+    add_member_button.grid(row=2, column=1, sticky="nsew", padx=(HALF, 0), pady=(0, GAP))
 
     # Dritte Reihe
-    tasks_button = ModernButton(frame, text="Aufgaben anzeigen", command=lambda: show_tasks() if show_tasks else None, padx=35, pady=22, font=("Segoe UI", 12, "bold"))
-    tasks_button.grid(row=3, column=0, sticky="nsew", padx=(0, 36), pady=0)
+    tasks_button = ModernButton(frame, text="Aufgaben anzeigen", command=lambda: show_tasks() if show_tasks else None, padx=20, pady=12, font=("Segoe UI", 14, "bold"))
+    tasks_button.grid(row=3, column=0, sticky="nsew", padx=(0, HALF), pady=0)
 
-    add_task_button = ModernButton(frame, text="Aufgabe hinzufügen", command=lambda: show_create_task() if show_create_task else None, padx=35, pady=22, font=("Segoe UI", 12, "bold"))
-    add_task_button.grid(row=3, column=1, sticky="nsew", padx=(36, 0), pady=0)
+    add_task_button = ModernButton(frame, text="Aufgabe hinzufügen", command=lambda: show_create_task() if show_create_task else None, padx=20, pady=12, font=("Segoe UI", 14, "bold"))
+    add_task_button.grid(row=3, column=1, sticky="nsew", padx=(HALF, 0), pady=0)
 
     return frame
 
