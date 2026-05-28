@@ -4,7 +4,7 @@ from src.gui.design_elements import *
 from src.dateiverwaltung import read
 from src.logic import *
 from src.projekt import Project
-from tkinter import ttk  # Wird für das Dropdown-Menü (Combobox) benötigt
+from tkinter import ttk  # Wird für Treeview und das Dropdown-Menü (Combobox) benötigt
 from src.dateiverwaltung import read
 from src.utils import validate_date_format, format_to_german_date
 
@@ -104,7 +104,6 @@ def project_screen(parent, back_command=None, create_command=None):
     # Projekte aus projekte.json laden
     projects = read(file_path)
 
-    # TODO in logic verschieben?
     def refresh_projects(data_to_show=None):
         proj_treeview.tree.delete(*proj_treeview.tree.get_children())
         # Wenn keine gefilterten Daten übergeben wurden, lade alle Projekte neu
@@ -267,7 +266,6 @@ def project_screen(parent, back_command=None, create_command=None):
             )
         )
 
-
     filter = ModernButton(controls, text="Filtern", command=open_filter_window)
     filter.grid(row=0, column=0, sticky="ew", padx=(80, 80))
 
@@ -282,9 +280,6 @@ def project_screen(parent, back_command=None, create_command=None):
     delete.grid(row=0, column=2, sticky="ew", padx=(80, 80))
 
     return frame
-
-
-
 
 def member_screen(parent, back_command=None, create_command=None, assign_command=None):
     frame = ModernCard(parent)
@@ -938,7 +933,6 @@ def resolve_project_for_member(member_name):
         return matching_projects[0]
 
     return None
-
 
 def create_member_assignment_starter(
     choose_project_screen_frame,
