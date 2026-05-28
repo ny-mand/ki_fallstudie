@@ -51,10 +51,10 @@ def mainscreen(parent, show_projects=None, show_members=None, show_tasks=None, s
     create_project_button.grid(row=1, column=1, sticky="nsew", padx=(HALF, 0), pady=(0, GAP))
 
     # Zweite Reihe
-    member_button = ModernButton(frame, text="Member anzeigen", command=lambda: show_members() if show_members else None, padx=20, pady=12, font=("Segoe UI", 14, "bold"))
+    member_button = ModernButton(frame, text="Teammitglieder anzeigen", command=lambda: show_members() if show_members else None, padx=20, pady=12, font=("Segoe UI", 14, "bold"))
     member_button.grid(row=2, column=0, sticky="nsew", padx=(0, HALF), pady=(0, GAP))
 
-    add_member_button = ModernButton(frame, text="Member hinzufügen", command=lambda: show_create_member() if show_create_member else None, padx=20, pady=12, font=("Segoe UI", 14, "bold"))
+    add_member_button = ModernButton(frame, text="Teammitglied hinzufügen", command=lambda: show_create_member() if show_create_member else None, padx=20, pady=12, font=("Segoe UI", 14, "bold"))
     add_member_button.grid(row=2, column=1, sticky="nsew", padx=(HALF, 0), pady=(0, GAP))
 
     # Dritte Reihe
@@ -90,9 +90,9 @@ def project_screen(parent, back_command=None, create_command=None):
 
     # Buttons
     controls = ModernCard(frame)
-    controls.columnconfigure(0, weight=1)
-    controls.columnconfigure(1, weight=1)
-    controls.columnconfigure(2, weight=1)
+    controls.columnconfigure(0, weight=1, uniform="project_actions")
+    controls.columnconfigure(1, weight=1, uniform="project_actions")
+    controls.columnconfigure(2, weight=1, uniform="project_actions")
     controls.grid(row=1, column=0, sticky="ew", pady=(0, 12))
 
     # List
@@ -267,17 +267,17 @@ def project_screen(parent, back_command=None, create_command=None):
         )
 
     filter = ModernButton(controls, text="Filtern", command=open_filter_window)
-    filter.grid(row=0, column=0, sticky="ew", padx=(80, 80))
+    filter.grid(row=0, column=0, sticky="ew", padx=12)
 
     create = ModernButton(controls, text="Erstellen", command=lambda: create_command() if create_command else None)
-    create.grid(row=0, column=1, sticky="ew", padx=7)
+    create.grid(row=0, column=1, sticky="ew", padx=12)
 
     delete = ModernButton(
         controls,
         text="Löschen",
         command=delete_selected_project
     )
-    delete.grid(row=0, column=2, sticky="ew", padx=(80, 80))
+    delete.grid(row=0, column=2, sticky="ew", padx=12)
 
     return frame
 
@@ -304,9 +304,10 @@ def member_screen(parent, back_command=None, create_command=None, assign_command
 
     # Buttons
     controls = ModernCard(frame)
-    controls.columnconfigure(0, weight=1)
-    controls.columnconfigure(1, weight=1)
-    controls.columnconfigure(2, weight=1)
+    controls.columnconfigure(0, weight=1, uniform="member_actions")
+    controls.columnconfigure(1, weight=1, uniform="member_actions")
+    controls.columnconfigure(2, weight=1, uniform="member_actions")
+    controls.columnconfigure(3, weight=1, uniform="member_actions")
     controls.grid(row=1, column=0, sticky="ew", pady=(0, 12))
 
     # List
@@ -346,13 +347,18 @@ def member_screen(parent, back_command=None, create_command=None, assign_command
             dialog_creation_error("Bitte zuerst ein Teammitglied auswählen.")
             return
         if assign_command:
-            assign_command(selected_name)
+            assign_command(selected_name, mode=assignment_mode["value"])
 
-    def unassign_selected_task_from_member():
-        selected_name = member_treeview.get_selected_name()
-        if not selected_name:
-            return
-        assign("unassign task", task_name=selected_name)
+    assignment_mode = {"value": "assign"}
+
+    def update_assignment_controls():
+        is_assign_mode = assignment_mode["value"] == "assign"
+        assign_button.config(text="Zuweisen" if is_assign_mode else "Entfernen")
+        mode_button.config(text="Modus umschalten")
+
+    def toggle_assignment_mode():
+        assignment_mode["value"] = "unassign" if assignment_mode["value"] == "assign" else "assign"
+        update_assignment_controls()
 
     member_treeview = ModernTreeview(
         member_list,
@@ -377,14 +383,19 @@ def member_screen(parent, back_command=None, create_command=None, assign_command
 
     refresh_members()
 
+    mode_button = ModernButton(controls, text="Modus umschalten", command=toggle_assignment_mode, padx=18, pady=10)
+    mode_button.grid(row=0, column=0, sticky="ew", padx=12)
+
     assign_button = ModernButton(controls, text="Zuweisen", command=assign_selected_member_to_project)
-    assign_button.grid(row=0, column=0, sticky="ew", padx=(80, 80))
+    assign_button.grid(row=0, column=1, sticky="ew", padx=12)
 
     create_button = ModernButton(controls, text="Erstellen", command=lambda: create_command() if create_command else None)
-    create_button.grid(row=0, column=1, sticky="ew", padx=7)
+    create_button.grid(row=0, column=2, sticky="ew", padx=12)
 
     delete_button = ModernButton(controls, text="Löschen", command=delete_selected_team_member)
-    delete_button.grid(row=0, column=2, sticky="ew", padx=(80, 80))
+    delete_button.grid(row=0, column=3, sticky="ew", padx=12)
+
+    update_assignment_controls()
 
     return frame
     # nutzt TeamMember.add_member() zum erstellen -> TODO def create_new_team_member() wie in project_screen
@@ -415,9 +426,10 @@ def task_screen(parent, back_command=None, create_command=None, assign_command=N
 
     # Buttons
     controls = ModernCard(frame)
-    controls.columnconfigure(0, weight=1)
-    controls.columnconfigure(1, weight=1)
-    controls.columnconfigure(2, weight=1)
+    controls.columnconfigure(0, weight=1, uniform="task_actions")
+    controls.columnconfigure(1, weight=1, uniform="task_actions")
+    controls.columnconfigure(2, weight=1, uniform="task_actions")
+    controls.columnconfigure(3, weight=1, uniform="task_actions")
     controls.grid(row=1, column=0, sticky="ew", pady=(0, 12))
 
     # List
@@ -458,13 +470,18 @@ def task_screen(parent, back_command=None, create_command=None, assign_command=N
             dialog_creation_error("Bitte zuerst eine Aufgabe auswählen.")
             return
         if assign_command:
-            assign_command(selected_name)
+            assign_command(selected_name, mode=assignment_mode["value"])
 
-    def unassign_selected_member_from_task():
-        selected_name = task_treeview.get_selected_name()
-        if not selected_name:
-            return
-        assign("unassign member", member_name=selected_name)
+    assignment_mode = {"value": "assign"}
+
+    def update_assignment_controls():
+        is_assign_mode = assignment_mode["value"] == "assign"
+        assign_button.config(text="Zuweisen" if is_assign_mode else "Entfernen")
+        mode_button.config(text="Modus umschalten")
+
+    def toggle_assignment_mode():
+        assignment_mode["value"] = "unassign" if assignment_mode["value"] == "assign" else "assign"
+        update_assignment_controls()
 
     task_treeview = ModernTreeview(
         task_list,
@@ -492,14 +509,19 @@ def task_screen(parent, back_command=None, create_command=None, assign_command=N
 
     refresh_tasks()
 
+    mode_button = ModernButton(controls, text="Modus umschalten", command=toggle_assignment_mode, padx=18, pady=10)
+    mode_button.grid(row=0, column=0, sticky="ew", padx=12)
+
     assign_button = ModernButton(controls, text="Zuweisen", command=assign_selected_task_to_member)
-    assign_button.grid(row=0, column=0, sticky="ew", padx=(80, 7))
+    assign_button.grid(row=0, column=1, sticky="ew", padx=12)
 
     create_button = ModernButton(controls, text="Erstellen", command=lambda: create_command() if create_command else None)
-    create_button.grid(row=0, column=1, sticky="ew", padx=7)
+    create_button.grid(row=0, column=2, sticky="ew", padx=12)
 
     delete_button = ModernButton(controls, text="Löschen", command=delete_selected_task)
-    delete_button.grid(row=0, column=2, sticky="ew", padx=(7, 80))
+    delete_button.grid(row=0, column=3, sticky="ew", padx=12)
+
+    update_assignment_controls()
 
     return frame
     # nutzt Task.create_task() zum erstellen -> TODO def create_new_task() wie in project_screen
@@ -941,11 +963,22 @@ def create_member_assignment_starter(
     refresh_members,
     refresh_projects,
 ):
-    def start_member_assignment(member_name):
+    def start_member_assignment(member_name, mode="assign"):
         member_name = member_name.strip()
         if not member_name:
             dialog_creation_error("Bitte zuerst ein Teammitglied auswählen.")
             return
+
+        is_assign_mode = mode != "unassign"
+        action_choice = "assign member" if is_assign_mode else "unassign member"
+        screen_instruction = (
+            "Wähle das Projekt aus, dem das Teammitglied zugewiesen werden soll."
+            if is_assign_mode
+            else "Wähle das Projekt aus, aus dem das Teammitglied entfernt werden soll."
+        )
+
+        if hasattr(choose_project_screen_frame, "set_instruction_text"):
+            choose_project_screen_frame.set_instruction_text(screen_instruction)
 
         def confirm_project(project_name):
             project_name = project_name.strip()
@@ -953,7 +986,7 @@ def create_member_assignment_starter(
                 dialog_creation_error("Bitte zuerst ein Projekt auswählen.")
                 return
 
-            assign_func("assign member", project_name=project_name, member_name=member_name)
+            assign_func(action_choice, project_name=project_name, member_name=member_name)
             refresh_members()
             refresh_projects()
             show_screen("member")
@@ -972,11 +1005,22 @@ def create_task_assignment_starter(
     refresh_members,
     refresh_projects,
 ):
-    def start_task_assignment(task_name):
+    def start_task_assignment(task_name, mode="assign"):
         task_name = task_name.strip()
         if not task_name:
             dialog_creation_error("Bitte zuerst eine Aufgabe auswählen.")
             return
+
+        is_assign_mode = mode != "unassign"
+        action_choice = "assign task" if is_assign_mode else "unassign task"
+        screen_instruction = (
+            "Wähle das Teammitglied aus, dem die Aufgabe zugewiesen werden soll."
+            if is_assign_mode
+            else "Wähle das Teammitglied aus, von dem die Aufgabe entfernt werden soll."
+        )
+
+        if hasattr(choose_member_screen_frame, "set_instruction_text"):
+            choose_member_screen_frame.set_instruction_text(screen_instruction)
 
         def confirm_member(member_name):
             member_name = member_name.strip()
@@ -992,7 +1036,7 @@ def create_task_assignment_starter(
                 return
 
             assign_func(
-                "assign task",
+                action_choice,
                 project_name=project_name,
                 member_name=member_name,
                 task_name=task_name,
@@ -1124,6 +1168,7 @@ def choose_project_screen(parent, back_command=None, confirm_command=None):
 
     frame.set_confirm_command = lambda command: callbacks.__setitem__("confirm", command)
     frame.set_back_command = lambda command: callbacks.__setitem__("back", command)
+    frame.set_instruction_text = lambda text: info_label.config(text=text)
 
     return frame
     # öffnet separates Fenster mit Projektliste, um auszuwählen, wo Task / Member hinzugefügt werden soll
@@ -1242,6 +1287,7 @@ def choose_member_screen(parent, back_command=None, confirm_command=None):
 
     frame.set_confirm_command = lambda command: callbacks.__setitem__("confirm", command)
     frame.set_back_command = lambda command: callbacks.__setitem__("back", command)
+    frame.set_instruction_text = lambda text: info_label.config(text=text)
 
     return frame
 
