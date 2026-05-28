@@ -79,6 +79,34 @@ Der Code ist modular aufgebaut (`src/`) und trennt Logik von Daten:
   * `utils.py`: Hilfsfunktionen für Input-Validierung und Datumsformatierung.
 * `data/`: Speicherort für die JSON-Dateien.
 
+### Fensterstruktur und verwendete Widgets
+Die Benutzeroberfläche wurde nach dem Prinzip der *Separation of Concerns* entwickelt. Die Kern-Logikklassen blieben unberührt, während die GUI als reine Präsentationsschicht darübergelegt wurde.
+* **Fensterstruktur:** Die Anwendung öffnet sich in einem zentralen Hauptfenster (`Tk`), das über ein strukturiertes Grid-Layout (`grid`) und Sub-Frames (`Frame`) in logische Arbeitsbereiche (Projekte, Team, Zuweisungen) unterteilt ist.
+* **Verwendete Widgets:**
+  * `ttk.Entry` & `tk.StringVar`: Zur dynamischen, asynchronen Eingabe und Übermittlung von Textdaten.
+  * `ttk.Radiobutton` / `ttk.Combobox`: Für die standardisierte Auswahl vordefinierter Werte wie Prioritäten (Niedrig, Mittel, Hoch).
+  * `ttk.Button`: Verknüpft mit ereignisgesteuerten Callbacks (Event-Handlern) zur Ausführung von Logik-Aktionen.
+  * `tk.Listbox` / `ttk.Treeview`: Zur übersichtlichen, tabellarischen Darstellung der geladenen Daten.
+  
+## Bedienung (Benutzerdokumentation)
+
+Die Interaktion mit dem Programm erfolgt intuitiv über die grafische Oberfläche des Hauptfensters.
+
+### 1. Welche Felder gibt es?
+* **Projektname / Aufgabenname / Name des Teammitglieds:** Freitextfelder (`Entry`) zur Eingabe der jeweiligen Bezeichnungen oder Namen.
+* **Startdatum / Fälligkeitsdatum:** Textfelder zur zeitlichen Eingabe. Diese erwarten zwingend das Format `TT.MM.JJJJ`.
+* **Priorität:** Radiobuttons zur exakten Festlegung der Dringlichkeitsstufe (Niedrig, Mittel, Hoch).
+* **Auswahllisten (Listboxen / Dropdowns):** Zur Selektion bereits angelegter Elemente, um beispielsweise Verknüpfungen oder Löschungen vorzunehmen.
+
+### 2. Welche Buttons führen welche Aktionen aus?
+* **[Projekt erstellen] / [Task hinzufügen] / [Mitglied anlegen]:** Liest die Werte aus den jeweiligen Eingabefeldern aus, erzeugt die entsprechenden Objekte im Hintergrund und speichert diese persistent in den JSON-Dateien ab. Die Listenansichten aktualisieren sich sofort.
+* **[Zuweisung vornehmen]:** Verknüpft ein in der Liste ausgewähltes Teammitglied mit einem ausgewählten Projekt oder einer Aufgabe.
+* **[Filter anwenden]:** Sortiert oder filtert die angezeigten Projekte in Echtzeit nach der ausgewählten Priorität oder dem Datum.
+* **[Löschen]:** Entfernt das aktuell in der Liste markierte Element unwiderruflich aus dem Datensatz.
+
+### 3. Was passiert bei ungültigen Eingaben?
+* Wenn Pflichtfelder (wie der Name) leer gelassen werden oder ein falsches Datumsformat eingegeben wird, bricht der Event-Handler die Verarbeitung sofort ab, um Datenfehler zu verhindern.
+* Das Programm wirft keine Terminal-Fehler mehr, sondern fängt die Ausnahmen ab und öffnet ein natives, visuelles GUI-Dialogfenster (`messagebox.showerror`). Dem Benutzer wird darin eine präzise Fehlermeldung (z. B. *"Eingabefehler: Das Datum muss im Format TT.MM.JJJJ eingegeben werden!"*) angezeigt, damit er die Eingabe korrigieren kann.
 ## Roadmap / Bekannte To-Dos
 
 Das Projekt ist funktionsfähig, folgende Erweiterungen sind geplant:
@@ -91,3 +119,4 @@ Das Projekt ist funktionsfähig, folgende Erweiterungen sind geplant:
 ---
 *Erstellt für die Übungsaufgabe KI Fallstudie 2 (Gruppe).*
 *AI: Formatierung von der Projektstruktur und die 'bash-Funktion' im README.
+
