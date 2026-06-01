@@ -7,6 +7,22 @@ from src.projekt import Project
 from tkinter import ttk  # Wird für Treeview und das Dropdown-Menü (Combobox) benötigt
 from src.utils import validate_date_format
 
+
+def _get_project_by_name(project_name):
+    file_path = Path(__file__).resolve().parent.parent.parent / "data" / "projekte.json"
+    for project in read(file_path):
+        if project.get("name", "").lower() == project_name.lower():
+            return project
+    return None
+
+
+def _normalize_member_tasks(tasks):
+    if isinstance(tasks, list):
+        return [str(task) for task in tasks if str(task).strip()]
+    if tasks:
+        return [str(tasks)]
+    return []
+
 def create_test_screen(parent):
     """Erstellt den Test-Screen Frame"""
     frm_test_screen = Frame(parent)
@@ -65,7 +81,7 @@ def mainscreen(parent, show_projects=None, show_members=None, show_tasks=None, s
 
     return frame
 
-def project_screen(parent, back_command=None, create_command=None):
+def project_screen(parent, back_command=None, create_command=None, detail_command=None):
     frame = ModernCard(parent)
     frame.grid(row=0, column=0, sticky="nsew")
     # frame.place(x=0, y=0, relwidth=1, relheight=1)
@@ -92,6 +108,7 @@ def project_screen(parent, back_command=None, create_command=None):
     controls.columnconfigure(0, weight=1, uniform="project_actions")
     controls.columnconfigure(1, weight=1, uniform="project_actions")
     controls.columnconfigure(2, weight=1, uniform="project_actions")
+    controls.columnconfigure(3, weight=1, uniform="project_actions")
     controls.grid(row=1, column=0, sticky="ew", pady=(0, 12))
 
     # List
@@ -128,6 +145,29 @@ def project_screen(parent, back_command=None, create_command=None):
             return
         delete_item("projekt", selected_name)
         refresh_projects()
+
+    def open_selected_project_details(event=None):
+        selected_name = None
+
+        if event is not None:
+            clicked_item = proj_treeview.tree.identify_row(event.y)
+            if clicked_item:
+                proj_treeview.tree.selection_set(clicked_item)
+                proj_treeview.tree.focus(clicked_item)
+                values = proj_treeview.tree.item(clicked_item, "values")
+                selected_name = values[1] if values and len(values) > 1 else None
+
+        if not selected_name:
+            selected_name = proj_treeview.get_selected_name()
+
+        if not selected_name:
+            dialog_creation_error("Bitte zuerst ein Projekt auswählen.")
+            return "break"
+
+        if detail_command:
+            detail_command(selected_name)
+
+        return "break"
 
     def open_filter_window():
         filter_popup = Toplevel(parent)
@@ -270,6 +310,92 @@ def project_screen(parent, back_command=None, create_command=None):
         command=delete_selected_project
     )
     delete.grid(row=0, column=2, sticky="ew", padx=12)
+
+    details = ModernButton(
+        controls,
+        text="Details",
+        command=open_selected_project_details
+    )
+    details.grid(row=0, column=3, sticky="ew", padx=12)
+
+    proj_treeview.tree.bind("<Double-1>", open_selected_project_details)
+
+    return frame
+
+
+def project_detail_screen(parent, back_command=None):
+    frame = ModernCard(parent)
+    frame.grid(row=0, column=0, sticky="nsew")
+    frame.columnconfigure(0, weight=1)
+    frame.rowconfigure(1, weight=1)
+
+    selected_project_var = StringVar(value="")
+
+    head = ModernCard(frame)
+    head.columnconfigure(0, weight=0)
+    head.columnconfigure(1, weight=1)
+    head.grid(row=0, column=0, sticky="ew", pady=(0, 12))
+
+    back_button = ModernButton(head, text="◀", command=lambda: back_command() if back_command else None, font=("Segoe UI", 13, "bold"), padx=14, pady=8)
+    back_button.grid(row=0, column=0, sticky="w")
+
+    header = HeaderLabel(head, text="Projekt-Details")
+    header.grid(row=0, column=1, sticky="w", padx=(50, 0))
+
+    content = ModernCard(frame)
+    content.grid(row=1, column=0, sticky="nsew")
+    content.columnconfigure(0, weight=1)
+    content.rowconfigure(0, weight=1)
+
+    project_treeview = ModernTreeview(content, columns=("member", "tasks", "count"))
+    project_treeview.grid(row=0, column=0, sticky="nsew")
+
+    project_treeview.tree.heading("#0", text="")
+    project_treeview.tree.column("#0", width=0, stretch=False)
+
+    project_treeview.heading("member", text="Mitglied")
+    project_treeview.column("member", width=260, anchor="w")
+
+    project_treeview.heading("tasks", text="Zugewiesene Aufgaben")
+    project_treeview.column("tasks", width=980, anchor="w")
+
+    project_treeview.heading("count", text="Anzahl")
+    project_treeview.column("count", width=100, anchor="center", stretch=False)
+
+    def refresh_project_details(project_name=None):
+        if project_name is not None:
+            selected_project_var.set(project_name.strip())
+
+        current_project_name = selected_project_var.get().strip()
+        project_treeview.tree.delete(*project_treeview.tree.get_children())
+
+        if not current_project_name:
+            header.config(text="Projekt-Details")
+            return
+
+        project = _get_project_by_name(current_project_name)
+        if not project:
+            header.config(text="Projekt-Details")
+            return
+
+        header.config(text=f"Projekt-Details: {project.get('name', '')}")
+
+        working_by_person = project.get("working_by_person", {}) or {}
+        if not working_by_person:
+            project_treeview.insert("", "end", values=("Keine Mitglieder zugewiesen", "-", 0))
+            return
+
+        for member_name, tasks in sorted(working_by_person.items(), key=lambda item: item[0].lower()):
+            normalized_tasks = _normalize_member_tasks(tasks)
+            tasks_text = ", ".join(normalized_tasks) if normalized_tasks else "Keine Aufgaben"
+            project_treeview.insert(
+                "",
+                "end",
+                values=(member_name, tasks_text, len(normalized_tasks))
+            )
+
+    frame.refresh_project_details = refresh_project_details
+    frame.set_project = lambda project_name: selected_project_var.set(project_name.strip() if project_name else "")
 
     return frame
 
@@ -972,6 +1098,9 @@ def create_member_assignment_starter(
         if hasattr(choose_project_screen_frame, "set_instruction_text"):
             choose_project_screen_frame.set_instruction_text(screen_instruction)
 
+        if hasattr(choose_project_screen_frame, "set_back_command"):
+            choose_project_screen_frame.set_back_command(lambda: show_screen("member"))
+
         def confirm_project(project_name):
             project_name = project_name.strip()
             if not project_name:
@@ -990,6 +1119,7 @@ def create_member_assignment_starter(
 
 
 def create_task_assignment_starter(
+    choose_project_screen_frame,
     choose_member_screen_frame,
     show_screen,
     assign_func,
@@ -1014,29 +1144,42 @@ def create_task_assignment_starter(
         if hasattr(choose_member_screen_frame, "set_instruction_text"):
             choose_member_screen_frame.set_instruction_text(screen_instruction)
 
+        if hasattr(choose_member_screen_frame, "set_back_command"):
+            choose_member_screen_frame.set_back_command(lambda: show_screen("task"))
+
         def confirm_member(member_name):
             member_name = member_name.strip()
             if not member_name:
                 dialog_creation_error("Bitte zuerst ein Teammitglied auswählen.")
                 return
 
-            project_name = resolve_project_for_member(member_name)
-            if not project_name:
-                dialog_creation_error(
-                    "Das Teammitglied ist keinem eindeutigen Projekt zugeordnet. Bitte Mitglied zuerst genau einem Projekt zuweisen."
+            if hasattr(choose_project_screen_frame, "set_instruction_text"):
+                choose_project_screen_frame.set_instruction_text(
+                    "Wähle das Projekt aus, in dem die Aufgabe zugewiesen oder entfernt werden soll."
                 )
-                return
 
-            assign_func(
-                action_choice,
-                project_name=project_name,
-                member_name=member_name,
-                task_name=task_name,
-            )
-            refresh_tasks()
-            refresh_members()
-            refresh_projects()
-            show_screen("task")
+            if hasattr(choose_project_screen_frame, "set_back_command"):
+                choose_project_screen_frame.set_back_command(lambda: show_screen("task"))
+
+            def confirm_project(project_name):
+                project_name = project_name.strip()
+                if not project_name:
+                    dialog_creation_error("Bitte zuerst ein Projekt auswählen.")
+                    return
+
+                assign_func(
+                    action_choice,
+                    project_name=project_name,
+                    member_name=member_name,
+                    task_name=task_name,
+                )
+                refresh_tasks()
+                refresh_members()
+                refresh_projects()
+                show_screen("task")
+
+            choose_project_screen_frame.set_confirm_command(confirm_project)
+            show_screen("choose_project_member")
 
         choose_member_screen_frame.set_confirm_command(confirm_member)
         show_screen("choose_member_task")

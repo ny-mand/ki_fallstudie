@@ -65,6 +65,10 @@ def show_screen(name):
     if callable(refresh_method):
         refresh_method()
 
+    refresh_method = getattr(screens[name], "refresh_project_details", None)
+    if callable(refresh_method):
+        refresh_method()
+
     raise_screen(screens[name])
 
 frm_mainscreen = mainscreen(
@@ -77,7 +81,18 @@ frm_mainscreen = mainscreen(
     show_create_task=lambda: show_screen("create_task"),
 )
 
-frm_project_screen = project_screen(root, back_command=lambda: show_screen("main"), create_command=lambda: show_screen("create_project"))
+def open_project_detail(project_name):
+    frm_project_detail_screen.set_project(project_name)
+    show_screen("project_detail")
+
+
+frm_project_detail_screen = project_detail_screen(root, back_command=lambda: show_screen("project"))
+frm_project_screen = project_screen(
+    root,
+    back_command=lambda: show_screen("main"),
+    create_command=lambda: show_screen("create_project"),
+    detail_command=open_project_detail,
+)
 frm_choose_project_member_screen = choose_project_screen(
     root,
     back_command=lambda: show_screen("member"),
@@ -106,6 +121,7 @@ frm_task_screen = task_screen(
     back_command=lambda: show_screen("main"),
     create_command=lambda: show_screen("create_task"),
     assign_command=create_task_assignment_starter(
+        choose_project_screen_frame=frm_choose_project_member_screen,
         choose_member_screen_frame=frm_choose_member_task_screen,
         show_screen=show_screen,
         assign_func=assign,
@@ -128,6 +144,7 @@ screens["create_member"] = frm_create_member_screen
 screens["create_task"] = frm_create_task_screen
 screens["choose_project_member"] = frm_choose_project_member_screen
 screens["choose_member_task"] = frm_choose_member_task_screen
+screens["project_detail"] = frm_project_detail_screen
 
 # Initial den Main-Screen zeigen
 raise_screen(frm_mainscreen)
